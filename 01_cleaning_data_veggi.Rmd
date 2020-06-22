@@ -1,0 +1,135 @@
+---
+title: "preparing data"
+author: "anne"
+date: "13 desember 2018"
+output: word_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+## Plots/ environment
+
+#### Look at data structure
+```{r}
+head(data_plots, n = 3)
+
+str(data_plots)
+
+
+```
+
+
+#### Deal with NAs
+```{r}
+nrow(data_plots)
+nrow(na.omit(data_plots))
+
+unique(unlist(lapply(data_plots, function (x) which(is.na(x)))))
+data_plots[102, ] # true NAs (fieldlayer hight, shrublayer height 1 and 2 missing)
+data_plots[108, ] # true NAs (fieldlayer hight missing)
+data_plots[217, ] # true NAs (fieldlayer hight missing)
+data_plots[90, ]  # true NAs (no canopy cover measures)
+data_plots[275, ] # true NAs (missing grain size)
+data_plots[276, ] # true NAs (missing grain size)
+data_plots[279, ] # true NAs (missing grain size)
+data_plots[185, ] # true NAs (missing soil dry weight and loi)
+data_plots[186, ] # true NAs (missing soil dry weight and loi)
+data_plots[35, ] # true NAs (missing loi)
+
+data_plots <- na.omit(data_plots)
+nrow(data_plots)
+nrow(na.omit(data_plots))
+
+
+
+```
+
+
+
+
+
+
+## Species/ cover
+
+#### Look at data structure
+```{r}
+head(data_species, n = 3)
+
+str(data_species)
+
+
+```
+
+
+#### Deal with NAs
+```{r}
+nrow(data_species)
+nrow(na.omit(data_species)) # 0 NAs
+
+# unique(unlist(lapply(data_species, function (x) which(is.na(x)))))
+# data_species <- na.omit(data_species)
+# nrow(data_species)
+# nrow(na.omit(data_species))
+
+
+
+```
+
+
+#### Spread the species data into wide format (species as columns)
+```{r}
+# library(tidyr)
+# 
+# data_species_wide <- data_species %>% pivot_wider(names_from = species, values_from = cover, names_repair = "minimal", values_fill = list(cover = 0), values_fn = list(cover = sum))
+# 
+# data_species_wide <- as.data.frame(data_species_wide)
+# 
+# save(data_species_wide, file = "data_species_wide_2020_04_20.rda")
+
+load("processdata/data_species_wide_2020_04_20.rda")
+head(data_species_wide)
+
+```
+
+
+```{r}
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,88 @@
+---
+title: "load data and libraries"
+author: "anne"
+date: "13 desember 2018"
+output: word_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load data 
+#### Plots/ environment
+```{r}
+library(readr)
+
+# data_plots <- read_delim("rawdata/fielddata_plots_2020-04-02.csv",
+#                          ";", escape_double = FALSE, col_types = cols(ID = col_character(), `Notes per site` = col_skip(), X36 = col_skip(), X39 = col_skip(), X41 = col_skip(), date = col_character(), notes = col_skip(), `notes loi` = col_skip()), na = "NA",
+#                          trim_ws = TRUE)
+# 
+# data_plots <- read_delim("rawdata/fielddata_plots_2020_04_20.csv",
+#                          ";", escape_double = FALSE, col_types = cols(ID = col_character(), date = col_character()), na = "NA",
+#                          trim_ws = TRUE)
+# 
+# data_plots <- as.data.frame(data_plots)
+head(data_plots)
+# save(data_plots, file = "data_plots_2020_04_20.rda")
+
+load("processdata/data_plots_2020_04_20.rda")
+
+                                                                      
+```
+
+
+#### Species/ cover
+```{r}
+library(readr)
+
+# data_species <- read_delim("rawdata/fielddata_species_2020_04_02.csv",
+#                            ";", escape_double = FALSE, col_types = cols(ID = col_character(), X4 = col_skip(), X6 = col_skip(), note = col_skip(), species_per_plot = col_skip(), usikker = col_skip()), na = "NA", trim_ws = TRUE)
+
+# data_species <- read_delim("rawdata/fielddata_species_2020_04_20.csv",
+#                            ";", escape_double = FALSE, col_types = cols(ID = col_character()), na = "NA", trim_ws = TRUE)
+# 
+# data_species <- as.data.frame(data_species)
+# head(data_species)
+# save(data_species, file = "data_species_2020_04_20.rda")
+
+load("processdata/data_species_2020_04_20.rda")
+load("processdata/data_species_wide_2020_04_20.rda")
+
+```
+
+
+
+```{r}
+library(ggplot2)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

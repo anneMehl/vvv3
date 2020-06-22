@@ -1,0 +1,28 @@
+---
+title: "frequency plots"
+author: "anne"
+date: "13 desember 2018"
+output: word_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+ggplot(data = fdata2, aes(species)) +
+  geom_bar()+
+  theme_classic() +
+  theme(axis.text.x=element_text(angle = -90, hjust = 0))
+
+ggplot(data = fdata2, aes(species, cover)) +
+  geom_boxplot()+
+  theme_classic() +
+  theme(axis.text.x=element_text(angle = -90, hjust = 0))
+
+```
+
