@@ -50,16 +50,9 @@ library(readr)
 
 load("processdata/data_species_2020_04_20.rda")
 load("processdata/data_species_wide_2020_04_20.rda")
+head(data_species_wide)
 
 ```
-
-
-
-```{r}
-library(ggplot2)
-
-```
-
 
 
 
