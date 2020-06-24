@@ -13,16 +13,170 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 
-
+## libraries
 ```{r}
 library(ggplot2)
 library(dplyr)
+library(Hmisc)
+library(quantreg)
+```
+
+
+## Plots/ environment
+```{r}
+str(data_plots)
+head(data_plots)
+
+hist_field_layer_c <- ggplot(data = data_plots, aes(field_layer_c)) + 
+  geom_histogram() +
+  theme_classic()
+
+hist_shrub_layer_c <- ggplot(data = data_plots, aes(shrub_layer_c)) + 
+  geom_histogram() +
+  theme_classic()
+
+hist_tree_layer_c <- ggplot(data = data_plots, aes(tree_layer_c)) + 
+  geom_histogram() +
+  theme_classic()
+
+
+# mean.cl.normal computes 3 summary variables: the sample mean and lower and upper Gaussian confidence limits based on the t-distribution.
+
+
+#### covers vs. site ----
+hist_site <- ggplot(data = data_plots, aes(site)) + 
+  geom_bar() +
+  theme_classic()
+
+
+fig_fieldlayer_site <- ggplot(data = data_plots, aes(x = site, y = field_layer_c, fill = site)) +
+  geom_boxplot(show.legend = F) +
+  theme_classic()
+
+fig_mean_fieldlayer_site <- ggplot(data = data_plots, aes(x = site, y = field_layer_c)) + geom_point() + 
+  stat_summary(fun.data = "mean_cl_normal", colour = "red", size = 2) +
+  theme_classic()
+
+
+fig_shrublayer_site <- ggplot(data = data_plots, aes(x = site, y = shrub_layer_c, fill = site)) +
+  geom_boxplot(show.legend = F) +
+  theme_classic()
+
+fig_mean_shrublayer_site <- ggplot(data = data_plots, aes(x = site, y = shrub_layer_c)) + geom_point() + 
+  stat_summary(fun.data = "mean_cl_normal", colour = "red", size = 2) +
+  theme_classic()
+
+
+fig_treelayer_site <- ggplot(data = data_plots, aes(x = site, y = tree_layer_c, fill = site)) +
+  geom_boxplot(show.legend = F) +
+  theme_classic()
+
+plot(data_plots$tree_layer_c)
+
+fig_mean_treelayer_site <- ggplot(data = data_plots, aes(x = site, y = tree_layer_c)) + geom_point() + 
+  stat_summary(fun.data = "mean_cl_normal", colour = "red", size = 2) +
+  theme_classic()
+
+
+
+#### covers vs. method ----
+hist_method <- ggplot(data = data_plots, aes(method)) + 
+  geom_bar() +
+  theme_classic()
+
+
+fig_fieldlayer_method <- ggplot(data = data_plots, aes(x = method, y = field_layer_c, fill = method)) +
+  geom_boxplot(show.legend = F) +
+  theme_classic()
+
+fig_mean_fieldlayer_method <- ggplot(data = data_plots, aes(x = method, y = field_layer_c)) + geom_point() + 
+  stat_summary(fun.data = "mean_cl_normal", colour = "red", size = 2) +
+  theme_classic()
+
+
+fig_shrublayer_method <- ggplot(data = data_plots, aes(x = method, y = shrub_layer_c, fill = method)) +
+  geom_boxplot(show.legend = F) +
+  theme_classic()
+
+fig_mean_shrublayer_method <- ggplot(data = data_plots, aes(x = method, y = shrub_layer_c)) + geom_point() + 
+  stat_summary(fun.data = "mean_cl_normal", colour = "red", size = 2) +
+  theme_classic()
+
+
+fig_treelayer_method <- ggplot(data = data_plots, aes(x = method, y = tree_layer_c, fill = method)) +
+  geom_boxplot(show.legend = F) +
+  theme_classic()
+
+fig_mean_treelayer_method <- ggplot(data = data_plots, aes(x = method, y = tree_layer_c)) + geom_point() + 
+  stat_summary(fun.data = "mean_cl_normal", colour = "red", size = 2) +
+  theme_classic()
+
+
+
+#### covers vs. grain size ----
+hist_grainsize <- ggplot(data = data_plots, aes(grain_size_stand_f)) + 
+  geom_bar() +
+  theme_classic()
+
+
+fig_fieldlayer_grainsize <- ggplot(data = data_plots, aes(x = grain_size_stand_f, y = field_layer_c, fill = grain_size_stand_f)) +
+  geom_boxplot(show.legend = F) +
+  theme_classic()
+
+fig_mean_fieldlayer_grain_size_stand_f <- ggplot(data = data_plots, aes(x = grain_size_stand_f, y = field_layer_c)) + geom_point() + 
+  stat_summary(fun.data = "mean_cl_normal", colour = "red", size = 2) +
+  theme_classic()
+
+
+fig_shrublayer_grainsize <- ggplot(data = data_plots, aes(x = grain_size_stand_f, y = shrub_layer_c, fill = grain_size_stand_f)) +
+  geom_boxplot(show.legend = F) +
+  theme_classic()
+
+fig_mean_shrublayer_grainsize <- ggplot(data = data_plots, aes(x = grain_size_stand_f, y = shrub_layer_c)) + geom_point() + 
+  stat_summary(fun.data = "mean_cl_normal", colour = "red", size = 2) +
+  theme_classic()
+
+
+fig_treelayer_grainsize <- ggplot(data = data_plots, aes(x = grain_size_stand_f, y = tree_layer_c, fill = grain_size_stand_f)) +
+  geom_boxplot(show.legend = F) +
+  theme_classic()
+
+fig_mean_treelayer_grainsize <- ggplot(data = data_plots, aes(x = grain_size_stand_f, y = tree_layer_c)) + geom_point() + 
+  stat_summary(fun.data = "mean_cl_normal", colour = "red", size = 2) +
+  theme_classic()
+
+
+
+#### covers vs. loss on ignition (loi) ----
+hist_loi <- ggplot(data = data_plots, aes(loi)) + 
+  geom_histogram() +
+  theme_classic()
+
+
+fig_fieldlayer_loi <- ggplot(data = data_plots, aes(x = loi, y = field_layer_c, fill = loi)) +
+  geom_point(show.legend = F) +
+  theme_classic()
+
+
+fig_shrublayer_loi <- ggplot(data = data_plots, aes(x = loi, y = shrub_layer_c, fill = loi)) +
+  geom_point(show.legend = F) +
+  theme_classic()
+
+
+fig_treelayer_loi <- ggplot(data = data_plots, aes(x = loi, y = tree_layer_c, fill = loi)) +
+  geom_point(show.legend = F) +
+  theme_classic()
 
 ```
 
 
 
+## Species/ cover
 ```{r}
+str(data_species_wide)
+head(data_species_wide)
+
+
 count_species_occurrences <- colSums(data_species_wide != 0)
 count_species_occurrences_df <- stack(count_species_occurrences)
 count_species_occurrences_df <- setNames(stack(count_species_occurrences)[2:1], c('species','occurrences'))
@@ -36,7 +190,7 @@ count_species_occurrences_df[ order(count_species_occurrences_df$species), ] # W
 ```
 
 ```{r}
-ggplot(count_species_occurrences_df2, aes(occurrences, species)) +
+ggplot(count_species_occurrences_df, aes(occurrences, species)) +
   geom_col() +
   theme_classic()
 
