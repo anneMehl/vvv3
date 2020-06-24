@@ -28,8 +28,8 @@ library(readr)
 head(data_plots)
 # save(data_plots, file = "data_plots_2020_04_20.rda")
 
-load("processdata/data_plots_2020_04_20.rda")
-
+# load("processdata/data_plots_2020_04_20.rda")
+load("processdata/data_plots_2020_06_24.rda")
                                                                       
 ```
 
@@ -48,7 +48,7 @@ library(readr)
 # head(data_species)
 # save(data_species, file = "data_species_2020_04_20.rda")
 
-load("processdata/data_species_2020_04_20.rda")
+# load("processdata/data_species_2020_04_20.rda")
 load("processdata/data_species_wide_2020_04_20.rda")
 head(data_species_wide)
 
