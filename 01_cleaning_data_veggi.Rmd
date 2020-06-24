@@ -46,12 +46,54 @@ data_plots <- na.omit(data_plots)
 nrow(data_plots)
 nrow(na.omit(data_plots))
 
+```
+
+
+#### change some character variables to factor
+```{r}
+data_plots$site <- as.factor(data_plots$site)
+str(data_plots$site)
+
+data_plots$method <- as.factor(data_plots$method)
+str(data_plots$method)
+
+data_plots$exposure <- as.factor(data_plots$exposure)
+str(data_plots$exposure)
+
+data_plots$grain_size_stand_f <- as.factor(data_plots$grain_size_stand)
+str(data_plots$grain_size_stand_f)
+
+data_plots$grain_size_f <- as.factor(data_plots$grain_size)
+str(data_plots$grain_size_f)
+
+```
+
+
+#### Change level names in exposure 
+```{r}
+levels(data_plots$exposure)[levels(data_plots$exposure)=="0"] <- "F"
+levels(data_plots$exposure)[levels(data_plots$exposure)=="S/E"] <- "SE"
+levels(data_plots$exposure)
+
+```
+
+
+#### Add a column with only year
+```{r}
+data_plots$date <- as.numeric(data_plots$date) # Not working
+data_plots$date <-as.Date(data_plots$date,
+  format = "%d/%m/%y") # Not working
 
 
 ```
 
 
 
+#### Save changes of data
+```{r}
+save(data_plots, file = "data_plots_2020_06_24.rda")
+
+```
 
 
 
@@ -89,17 +131,16 @@ nrow(na.omit(data_species)) # 0 NAs
 # data_species_wide <- data_species %>% pivot_wider(names_from = species, values_from = cover, names_repair = "minimal", values_fill = list(cover = 0), values_fn = list(cover = sum))
 # 
 # data_species_wide <- as.data.frame(data_species_wide)
-# 
-# save(data_species_wide, file = "data_species_wide_2020_04_20.rda")
 
-load("processdata/data_species_wide_2020_04_20.rda")
-head(data_species_wide)
 
 ```
 
-
+#### Save new data/ changes
 ```{r}
+save(data_species_wide, file = "data_species_wide_2020_04_20.rda")
 
+load("processdata/data_species_wide_2020_04_20.rda")
+head(data_species_wide)
 
 ```
 
