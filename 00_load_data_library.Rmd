@@ -46,9 +46,9 @@ library(readr)
 # 
 # data_species <- as.data.frame(data_species)
 # head(data_species)
-# save(data_species, file = "data_species_2020_04_20.rda")
+# save(data_species, file = "data_species_2020_06_25.rda")
 
-# load("processdata/data_species_2020_04_20.rda")
+load("processdata/data_species_2020_04_20.rda")
 load("processdata/data_species_wide_2020_04_20.rda")
 head(data_species_wide)
 
