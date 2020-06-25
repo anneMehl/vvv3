@@ -80,10 +80,49 @@ levels(data_plots$exposure)
 
 #### Add a column with only year
 ```{r}
-data_plots$date <- as.numeric(data_plots$date) # Not working
-data_plots$date <-as.Date(data_plots$date,
-  format = "%d/%m/%y") # Not working
+library(tidyverse)
 
+data_plots <- data_plots %>%
+  separate(date, into = c("day", "month", "year"), remove = F) # Can also use  sep = "."  to specify the seperator
+
+data_plots$year <- as.numeric(data_plots$year)
+data_plots$month <- as.numeric(data_plots$month)
+data_plots$day <- as.numeric(data_plots$day)
+
+```
+
+
+#### Add a column with site ID and one with plot number
+```{r}
+library(tidyverse)
+
+data_plots <- data_plots %>%
+  separate(ID, into = c("siteID", "plotnumb"), remove = F) # Can also use  sep = "."  to specify the seperator
+
+data_plots$siteID <- as.factor(data_plots$siteID)
+data_plots$plotnumb <- as.factor(data_plots$plotnumb)
+  
+  
+```
+
+
+#### Add a column with reference plot yes or no
+```{r}
+
+data_plots$plotnumb <- as.numeric(data_plots$plotnumb)
+data_plots$reference <- ifelse(data_plots$plotnumb >= 9, "yes", "no")
+
+data_plots$reference <- as.factor(data_plots$reference)
+
+
+```
+
+
+#### Rename variable site
+```{r}
+data_plots <- data_plots %>% 
+  rename(
+    site_type = site)
 
 ```
 
@@ -91,7 +130,7 @@ data_plots$date <-as.Date(data_plots$date,
 
 #### Save changes of data
 ```{r}
-save(data_plots, file = "data_plots_2020_06_24.rda")
+save(data_plots, file = "data_plots_2020_06_25.rda")
 
 ```
 
@@ -120,6 +159,9 @@ nrow(na.omit(data_species)) # 0 NAs
 # nrow(na.omit(data_species))
 
 
+nrow(data_species_wide)
+nrow(na.omit(data_species_wide)) # 0 NAs
+
 
 ```
 
@@ -135,9 +177,40 @@ nrow(na.omit(data_species)) # 0 NAs
 
 ```
 
+
+#### Add a column with site ID and one with plot number
+```{r}
+library(tidyverse)
+
+data_species_wide <- data_species_wide %>%
+  separate(ID, into = c("siteID", "plotnumb"), remove = F) # Can also use  sep = "."  to specify the seperator
+
+data_species_wide$siteID <- as.factor(data_species_wide$siteID)
+data_species_wide$plotnumb <- as.factor(data_species_wide$plotnumb)
+  
+  
+```
+
+
+#### Add a column with reference plot yes or no
+```{r}
+
+data_species_wide$plotnumb <- as.numeric(data_species_wide$plotnumb)
+data_species_wide$reference <- ifelse(data_species_wide$plotnumb >= 9, "yes", "no")
+
+data_species_wide$reference <- as.factor(data_species_wide$reference)
+
+str(data_species_wide$plotnumb)
+str(data_species_wide$siteID)
+str(data_species_wide$reference)
+
+```
+
+
+
 #### Save new data/ changes
 ```{r}
-save(data_species_wide, file = "data_species_wide_2020_04_20.rda")
+save(data_species_wide, file = "data_species_wide_2020_06_25.rda")
 
 load("processdata/data_species_wide_2020_04_20.rda")
 head(data_species_wide)
