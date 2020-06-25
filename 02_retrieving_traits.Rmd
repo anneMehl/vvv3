@@ -1,0 +1,105 @@
+---
+title: "02_retrieving_traits"
+output: word_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+## load libraries and data
+```{r}
+library(TR8)
+library(traits)
+
+load("processdata/data_species_2020_04_20.rda")
+
+```
+
+## remove dublicate species and make a species list
+```{r}
+dublicates <- sum(duplicated(data_species$species))
+
+species_list <- unique(data_species$species)
+
+```
+
+## save species list
+```{r}
+save(species_list, file = "species_list_2020_06_25.rda")
+
+load("processdata/species_list_2020_06_25.rda")
+head(species_list)
+
+```
+
+## Retrieving traits data from different databases - maybe easiest with TR8
+#### Retrieve traits with TR8 package
+```{r}
+my_traits <- tr8(species_list = c("Anemone nemorosa", "Agrostis capillaris", "Festuca ovina"), gui_config = T)
+
+## extract the data from the object returned by tr8()
+traits2 <- extract_traits(my_traits)
+traits2 <- as.matrix(traits2)
+traits2 <- as.data.frame(traits2)
+
+head(traits2)
+
+
+
+
+bib(my_traits)
+lookup(my_traits)
+
+```
+
+
+#### Retrieve traits with traits package
+```{r}
+my_traits2 <- taxa_search(c("Anemone nemorosa", "Agrostis capillaris", "Festuca ovina"), db = "ncbi")
+# Taxa search for the moment only available for the ncbi database...
+
+my_traits2_anemone <- as.data.frame(my_traits2$`Anemone nemorosa`)
+
+
+test_leda <- leda(trait = "seed_mass")
+
+all <- c("age_first_flowering", "branching", "buds_seasonality",
+  "buds_vertical_dist", "canopy_height",
+  "dispersal_type", "leaf_distribution", "ldmc_geo", "leaf_mass",
+  "leaf_size", "morphology_disperal", "growth_form", "life_span",
+  "releasing_height", "seed_longevity", "seed_mass",
+  "seed_number", "seed_shape", "shoot_growth_form",
+  "snp", "ssd", "tv", "clonal_growth_organs")
+
+# Age of first flowering, Branching, Bud bank seasonality and vertical distribution, Canopy height, Leaf distribution, Leaf dry matter content, Leaf mass, Leaf size, Plant growth form, Plant life span, Releasing height, Seed mass, Seed number per shoot, Shoot growth form, Specific leaf area, Terminal velocity, Woodiness
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
