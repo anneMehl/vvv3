@@ -29,7 +29,7 @@ head(data_plots)
 # save(data_plots, file = "data_plots_2020_04_20.rda")
 
 # load("processdata/data_plots_2020_04_20.rda")
-load("processdata/data_plots_2020_06_24.rda")
+load("processdata/data_plots_2020_06_25.rda")
                                                                       
 ```
 
@@ -49,7 +49,11 @@ library(readr)
 # save(data_species, file = "data_species_2020_06_25.rda")
 
 load("processdata/data_species_2020_04_20.rda")
+
 load("processdata/data_species_wide_2020_04_20.rda")
+load("processdata/data_species_wide_2020_06_25.rda")
+load("processdata/data_species_wide_2020_06_26.rda")
+load("processdata/data_species_wide2_2020_06_26.rda") # Includes mean and sd of species for columns and rows
 head(data_species_wide)
 
 ```
