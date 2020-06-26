@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 
-## Plots/ environment
+## ---------------------- Plots/ environment-------------------------------
 
 #### Look at data structure
 ```{r}
@@ -136,7 +136,12 @@ save(data_plots, file = "data_plots_2020_06_25.rda")
 
 
 
-## Species/ cover
+
+
+
+
+
+## ---------------------- Species/ cover ---------------------------
 
 #### Look at data structure
 ```{r}
@@ -183,10 +188,12 @@ nrow(na.omit(data_species_wide)) # 0 NAs
 library(tidyverse)
 
 data_species_wide <- data_species_wide %>%
-  separate(ID, into = c("siteID", "plotnumb"), remove = F) # Can also use  sep = "."  to specify the seperator
+  separate(ID, into = c(NA, "plotID"), remove = F) # Can also use  sep = "."  to specify the seperator , convert = TRUE
+data_species_wide <- data_species_wide %>%
+  separate(ID, into = c("siteID", NA), remove = F) # Can also use  sep = "."  to specify the seperator , convert = TRUE
 
 data_species_wide$siteID <- as.factor(data_species_wide$siteID)
-data_species_wide$plotnumb <- as.factor(data_species_wide$plotnumb)
+
   
   
 ```
@@ -194,15 +201,80 @@ data_species_wide$plotnumb <- as.factor(data_species_wide$plotnumb)
 
 #### Add a column with reference plot yes or no
 ```{r}
-
-data_species_wide$plotnumb <- as.numeric(data_species_wide$plotnumb)
-data_species_wide$reference <- ifelse(data_species_wide$plotnumb >= 9, "yes", "no")
+data_species_wide$plotID <- as.numeric(data_species_wide$plotID)
+data_species_wide$reference <- ifelse(data_species_wide$plotID > 8, "yes", "no")
 
 data_species_wide$reference <- as.factor(data_species_wide$reference)
+data_species_wide$plotID <- as.factor(data_species_wide$plotID)
 
-str(data_species_wide$plotnumb)
+str(data_species_wide$plotID)
 str(data_species_wide$siteID)
 str(data_species_wide$reference)
+
+head(data_species_wide$plotID, n = 25L)
+head(data_species_wide$reference, n = 25L)
+
+```
+
+#### Remove space and dots in species names
+```{r}
+library(janitor)
+
+data_species_wide <- data_species_wide %>%
+  clean_names()
+
+```
+
+
+
+#### Summarise over rows and columns
+```{r}
+## create a list with function to use over each column
+mean_sd <- list(
+  mean = ~mean(.x, na.rm = TRUE), 
+  sd = ~sd(.x, na.rm = TRUE)
+)
+
+## Creat new dataframe with summary for each species column (mean and sd)
+#### per site
+data_species_wide_site_mean_sd <- data_species_wide %>%
+  group_by(site_id) %>%
+  summarise(
+    across(anemone_nemorosa:lolium_perenne, mean_sd),
+     
+  )
+
+# data_species_wide_mean_sd <- data_species_wide %>%
+#   summarise(
+#     across(anemone_nemorosa:lolium_perenne, mean_sd),
+#      
+#   )
+
+#### over entire df
+data_species_wide_mean <- data_species_wide %>%
+  summarise(
+    across(taraxacum_sp:lolium_perenne, mean),
+     
+  )
+
+data_species_wide_sd <- data_species_wide %>%
+  summarise(
+    across(taraxacum_sp:lolium_perenne, sd),
+     
+  )
+
+## If preferred, add the rows to existing dataframe
+data_species_wide_temp <- bind_rows(data_species_wide, data_species_wide_mean)
+data_species_wide_temp <- bind_rows(data_species_wide_temp, data_species_wide_sd)
+
+
+```
+
+
+```{r}
+# use c_across() to more easily select many variables
+data_species_wide2 <- data_species_wide2 %>% rowwise() %>% mutate(m = mean(c_across(taraxacum_sp:lolium_perenne))) %>%
+  mutate(sd = sd(c_across(taraxacum_sp:lolium_perenne)))
 
 ```
 
@@ -210,24 +282,14 @@ str(data_species_wide$reference)
 
 #### Save new data/ changes
 ```{r}
-save(data_species_wide, file = "data_species_wide_2020_06_25.rda")
+save(data_species_wide, file = "data_species_wide_2020_06_26.rda")
+save(data_species_wide2, file = "data_species_wide2_2020_06_26.rda") # Includes mean and sd of species for columns and rows
 
-load("processdata/data_species_wide_2020_04_20.rda")
+load("processdata/data_species_wide_2020_06_26.rda")
+load("processdata/data_species_wide2_2020_06_26.rda") # Includes mean and sd of species for columns and rows
 head(data_species_wide)
 
 ```
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
