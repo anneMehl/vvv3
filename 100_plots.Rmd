@@ -22,7 +22,7 @@ library(quantreg)
 ```
 
 
-## Plots/ environment
+## --------------------------- Plots/ environment ------------------------
 ```{r}
 str(data_plots)
 head(data_plots)
@@ -257,7 +257,7 @@ fig_groundlayer_caco <- ggplot(data = data_plots, aes(x = caco, y = ground_layer
 
 
 
-## Species/ cover
+## --------------------- Species/ cover --------------------
 ```{r}
 str(data_species_wide)
 head(data_species_wide)
@@ -266,11 +266,8 @@ head(data_species_wide)
 count_species_occurrences <- colSums(data_species_wide != 0)
 count_species_occurrences_df <- stack(count_species_occurrences)
 count_species_occurrences_df <- setNames(stack(count_species_occurrences)[2:1], c('species','occurrences'))
-count_species_occurrences_df <- arrange(count_species_occurrences_df, species) # Why does this not work?
-count_species_occurrences_df[ order(count_species_occurrences_df$species), ] # Why does this not work?
-
-
-
+# # Why does this not work? count_species_occurrences_df <- arrange(count_species_occurrences_df, species) 
+# # Why does this not work? count_species_occurrences_df[ order(count_species_occurrences_df$species), ] 
 
 
 ```
@@ -282,18 +279,4 @@ ggplot(count_species_occurrences_df, aes(occurrences, species)) +
 
 ```
 
-
-
-```{r}
-# ggplot(data = fdata2, aes(species)) +
-#   geom_bar()+
-#   theme_classic() +
-#   theme(axis.text.x=element_text(angle = -90, hjust = 0))
-# 
-# ggplot(data = fdata2, aes(species, cover)) +
-#   geom_boxplot()+
-#   theme_classic() +
-#   theme(axis.text.x=element_text(angle = -90, hjust = 0))
-
-```
 
