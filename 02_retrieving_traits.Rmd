@@ -20,6 +20,7 @@ load("processdata/data_species_2020_04_20.rda")
 
 ```
 
+
 ## remove dublicate species and make a species list
 ```{r}
 dublicates <- sum(duplicated(data_species$species))
@@ -27,6 +28,7 @@ dublicates <- sum(duplicated(data_species$species))
 species_list <- unique(data_species$species)
 
 ```
+
 
 ## save species list
 ```{r}
@@ -37,7 +39,11 @@ head(species_list)
 
 ```
 
-## Retrieving traits data from different databases - maybe easiest with TR8
+
+
+
+
+## Retrieving traits data from different databases -----------> maybe easiest with TR8!!!
 #### Retrieve traits with TR8 package
 ```{r}
 my_traits <- tr8(species_list = c("Anemone nemorosa", "Agrostis capillaris", "Festuca ovina"), gui_config = T)
@@ -56,6 +62,7 @@ bib(my_traits)
 lookup(my_traits)
 
 ```
+
 
 
 #### Retrieve traits with traits package
