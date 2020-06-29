@@ -1,0 +1,448 @@
+---
+title: "preparing data"
+author: "anne"
+date: "13 desember 2018"
+output: word_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+## ---------------------- Plots/ environment-------------------------------
+
+#### Look at data structure
+```{r}
+head(data_plots, n = 3)
+
+str(data_plots)
+
+
+```
+
+
+#### Deal with NAs (! not yet, we will do it later since we want to add new columns with bind_col and then the two dataframes need the same length !)
+```{r}
+# nrow(data_plots)
+# nrow(na.omit(data_plots))
+# 
+# unique(unlist(lapply(data_plots, function (x) which(is.na(x)))))
+# data_plots[102, ] # true NAs (fieldlayer hight, shrublayer height 1 and 2 missing)
+# data_plots[108, ] # true NAs (fieldlayer hight missing)
+# data_plots[217, ] # true NAs (fieldlayer hight missing)
+# data_plots[90, ]  # true NAs (no canopy cover measures)
+# data_plots[275, ] # true NAs (missing grain size)
+# data_plots[276, ] # true NAs (missing grain size)
+# data_plots[279, ] # true NAs (missing grain size)
+# data_plots[185, ] # true NAs (missing soil dry weight and loi)
+# data_plots[186, ] # true NAs (missing soil dry weight and loi)
+# data_plots[35, ] # true NAs (missing loi)
+# 
+# data_plots <- na.omit(data_plots)
+# nrow(data_plots)
+# nrow(na.omit(data_plots))
+
+```
+
+
+#### change some character variables to factor
+```{r}
+data_plots$site <- as.factor(data_plots$site)
+str(data_plots$site)
+
+data_plots$method <- as.factor(data_plots$method)
+str(data_plots$method)
+
+data_plots$exposure <- as.factor(data_plots$exposure)
+str(data_plots$exposure)
+
+data_plots$grain_size_stand_f <- as.factor(data_plots$grain_size_stand)
+str(data_plots$grain_size_stand_f)
+
+data_plots$grain_size_f <- as.factor(data_plots$grain_size)
+str(data_plots$grain_size_f)
+
+```
+
+
+#### Change level names in exposure 
+```{r}
+levels(data_plots$exposure)[levels(data_plots$exposure)=="0"] <- "F"
+levels(data_plots$exposure)[levels(data_plots$exposure)=="S/E"] <- "SE"
+levels(data_plots$exposure)
+
+```
+
+
+#### Add a column with only year
+```{r}
+library(tidyverse)
+
+data_plots <- data_plots %>%
+  separate(date, into = c("day", "month", "year"), remove = F) # Can also use  sep = "."  to specify the seperator
+
+data_plots$year <- as.numeric(data_plots$year)
+data_plots$month <- as.numeric(data_plots$month)
+data_plots$day <- as.numeric(data_plots$day)
+
+```
+
+
+#### Add a column with site ID and one with plot number
+```{r}
+library(tidyverse)
+
+data_plots <- data_plots %>%
+  separate(ID, into = c("siteID", "plotnumb"), remove = F) # Can also use  sep = "."  to specify the seperator
+
+data_plots$siteID <- as.factor(data_plots$siteID)
+data_plots$plotnumb <- as.factor(data_plots$plotnumb)
+  
+  
+```
+
+
+#### Add a column with reference plot yes or no
+```{r}
+
+data_plots$plotnumb <- as.numeric(data_plots$plotnumb)
+data_plots$reference <- ifelse(data_plots$plotnumb >= 9, "yes", "no")
+
+data_plots$reference <- as.factor(data_plots$reference)
+
+
+```
+
+
+#### Rename variable site
+```{r}
+data_plots <- data_plots %>% 
+  rename(
+    site_type = site)
+
+```
+
+
+#### Add mean and sd species cover to plots dataset
+```{r}
+load("processdata/data_plots_2020_04_20.rda")
+
+data_plots2 <- bind_cols(data_plots, data_species_wide2$m)
+data_plots2 <- data_plots2 %>% 
+  rename(
+    mean_cover = ...44)
+
+data_plots2 <- bind_cols(data_plots2, data_species_wide2$sd)
+data_plots2 <- data_plots2 %>% 
+  rename(
+    sd_cover = ...45)
+
+```
+
+#### Deal with NAs (after adding new columns)
+```{r}
+nrow(data_plots2)
+nrow(na.omit(data_plots2))
+
+unique(unlist(lapply(data_plots2, function (x) which(is.na(x)))))
+data_plots2[102, ] # true NAs (fieldlayer hight, shrublayer height 1 and 2 missing)
+data_plots2[108, ] # true NAs (fieldlayer hight missing)
+data_plots2[217, ] # true NAs (fieldlayer hight missing)
+data_plots2[90, ]  # true NAs (no canopy cover measures)
+data_plots2[275, ] # true NAs (missing grain size)
+data_plots2[276, ] # true NAs (missing grain size)
+data_plots2[279, ] # true NAs (missing grain size)
+data_plots2[185, ] # true NAs (missing soil dry weight and loi)
+data_plots2[186, ] # true NAs (missing soil dry weight and loi)
+data_plots2[35, ] # true NAs (missing loi)
+
+data_plots2 <- na.omit(data_plots2)
+nrow(data_plots2)
+nrow(na.omit(data_plots2))
+
+```
+
+
+#### Add a total cover column from adding up the cover of each layer
+```{r}
+data_plots2$total_cover_layers <- data_plots2$ground_layer_c + data_plots2$field_layer_c + data_plots2$shrub_layer_c + data_plots2$tree_layer_c
+```
+
+
+#### Subset all reference plots
+```{r}
+data_plots2_reference <- filter(data_plots2, reference == "yes")
+data_plots2_reference <- as.data.frame(data_plots2_reference)
+
+```
+
+
+#### Subset all non-reference plots
+```{r}
+data_plots2_normal <- filter(data_plots2, reference == "no")
+data_plots2_normal <- as.data.frame(data_plots2_normal)
+
+```
+
+
+#### Save changes of data
+```{r}
+save(data_plots, file = "data_plots_2020_06_25.rda")
+save(data_plots2, file = "data_plots2_2020_06_29.rda") # Like data_plots, but inluding column with mean cover and sd (species), total_cover_layers
+save(data_plots2_reference, file = "data_plots2_reference_2020_06_29.rda") # Like data_plots2, but only reference plots
+save(data_plots2_normal, file = "data_plots2_normal_2020_06_29.rda") # Like data_plots2, but only non-reference plots
+
+load("processdata/data_plots_2020_06_25.rda")
+load("processdata/data_plots2_2020_06_29.rda") # Like data_plots, but inluding column with mean cover and sd (species)
+load("processdata/data_plots2_reference_2020_06_29.rda") # Like data_plots2, but only reference plots
+load("processdata/data_plots2_normal_2020_06_29.rda") # Like data_plots2, but only non-reference plots
+```
+
+
+
+
+
+
+
+
+## ---------------------- Species/ cover ---------------------------
+
+#### Look at data structure
+```{r}
+head(data_species, n = 3)
+
+str(data_species)
+
+
+```
+
+
+#### Deal with NAs
+```{r}
+nrow(data_species)
+nrow(na.omit(data_species)) # 0 NAs
+
+# unique(unlist(lapply(data_species, function (x) which(is.na(x)))))
+# data_species <- na.omit(data_species)
+# nrow(data_species)
+# nrow(na.omit(data_species))
+
+
+nrow(data_species_wide)
+nrow(na.omit(data_species_wide)) # 0 NAs
+
+
+```
+
+
+#### Spread the species data into wide format (species as columns)
+```{r}
+# library(tidyr)
+# 
+# data_species_wide <- data_species %>% pivot_wider(names_from = species, values_from = cover, names_repair = "minimal", values_fill = list(cover = 0), values_fn = list(cover = sum))
+# 
+# data_species_wide <- as.data.frame(data_species_wide)
+
+
+```
+
+
+#### Add a column with site ID and one with plot number
+```{r}
+library(tidyverse)
+
+data_species_wide <- data_species_wide %>%
+  separate(ID, into = c(NA, "plotID"), remove = F) # Can also use  sep = "."  to specify the seperator , convert = TRUE
+data_species_wide <- data_species_wide %>%
+  separate(ID, into = c("siteID", NA), remove = F) # Can also use  sep = "."  to specify the seperator , convert = TRUE
+
+data_species_wide$siteID <- as.factor(data_species_wide$siteID)
+
+  
+  
+```
+
+
+#### Add a column with reference plot yes or no
+```{r}
+data_species_wide$plotID <- as.numeric(data_species_wide$plotID)
+data_species_wide$reference <- ifelse(data_species_wide$plotID > 8, "yes", "no")
+
+data_species_wide$reference <- as.factor(data_species_wide$reference)
+data_species_wide$plotID <- as.factor(data_species_wide$plotID)
+
+str(data_species_wide$plotID)
+str(data_species_wide$siteID)
+str(data_species_wide$reference)
+
+head(data_species_wide$plotID, n = 25L)
+head(data_species_wide$reference, n = 25L)
+
+```
+
+#### Remove space and dots in species names
+```{r}
+library(janitor)
+
+data_species_wide <- data_species_wide %>%
+  clean_names()
+
+```
+
+
+
+#### Summarise over columns
+```{r}
+## create a list with function to use over each column
+mean_sd <- list(
+  mean = ~mean(.x, na.rm = TRUE), 
+  sd = ~sd(.x, na.rm = TRUE)
+)
+
+## Creat new dataframe with summary for each species column (mean and sd)
+
+#### per site
+data_species_wide_site_mean_sd <- data_species_wide %>%
+  group_by(site_id) %>%
+  summarise(
+    across(anemone_nemorosa:lolium_perenne, mean_sd),
+     
+  )
+
+
+#### over entire df
+data_species_wide_mean <- data_species_wide %>%
+  summarise(
+    across(taraxacum_sp:lolium_perenne, mean),
+     
+  )
+
+data_species_wide_sd <- data_species_wide %>%
+  summarise(
+    across(taraxacum_sp:lolium_perenne, sd),
+     
+  )
+
+## If preferred, add the rows to (existing) dataframe
+data_species_wide_temp <- bind_rows(data_species_wide, data_species_wide_mean)
+data_species_wide_2 <- bind_rows(data_species_wide_temp, data_species_wide_sd)
+
+
+```
+
+#### Summarise over rows
+```{r}
+# use c_across() to more easily select many variables
+data_species_wide2 <- data_species_wide2 %>% rowwise() %>% 
+  mutate(m = mean(c_across(taraxacum_sp:lolium_perenne))) %>%
+  mutate(sd = sd(c_across(taraxacum_sp:lolium_perenne)))
+
+```
+
+#### Subset all reference plots
+```{r}
+data_species_wide2_reference <- filter(data_species_wide2, reference == "yes")
+data_species_wide2_reference <- as.data.frame(data_species_wide2_reference)
+
+```
+
+
+#### Summarise over columns in reference data
+```{r}
+data_species_wide2_reference_mean <- data_species_wide2_reference %>%
+  summarise(
+    across(taraxacum_sp:lolium_perenne, mean),
+     
+  )
+
+##### Why the hell does this not work??
+
+# data_species_wide2_reference_sd <- data_species_wide2_reference %>%
+#   summarise(
+#     across(taraxacum_sp:lolium_perenne, sd),
+#      
+#   ) 
+
+
+data_species_wide2_reference <- bind_rows(data_species_wide2_reference, data_species_wide2_reference_mean)
+# data_species_wide2_reference <- bind_rows(data_species_wide2_reference, data_species_wide2_reference_sd)
+
+```
+
+#### Subset all non-reference plots
+```{r}
+data_species_wide2_normal <- filter(data_species_wide2, reference == "no")
+data_species_wide2_normal <- as.data.frame(data_species_wide2_normal)
+
+```
+
+
+#### Summarise over columns in reference data
+```{r}
+data_species_wide2_normal_mean <- data_species_wide2_normal %>%
+  summarise(
+    across(taraxacum_sp:lolium_perenne, mean),
+     
+  )
+
+##### Why the hell does this not work??
+
+# data_species_wide2_normal_sd <- data_species_wide2_normal %>%
+#   summarise(
+#     across(taraxacum_sp:lolium_perenne, sd),
+# 
+#   )
+
+
+data_species_wide2_normal <- bind_rows(data_species_wide2_normal, data_species_wide2_normal_mean)
+# data_species_wide2_reference <- bind_rows(data_species_wide2_reference, data_species_wide2_reference_sd)
+
+```
+
+
+#### ID as factor (for reference dataset)
+```{r}
+data_species_wide2_reference$id <- as.factor(data_species_wide2_reference$id)
+
+```
+
+
+
+#### Save new data/ changes
+```{r}
+save(data_species_wide, file = "data_species_wide_2020_06_26.rda")
+save(data_species_wide2, file = "data_species_wide2_2020_06_26.rda") # Includes mean and sd of species for both columns and rows
+save(data_species_wide2_reference, file = "data_species_wide2_reference_2020_06_29.rda") # Only reference plots, includes mean adn sd for rows and mean for columns
+save(data_species_wide2_normal, file = "data_species_wide2_normal_2020_06_29.rda") # Only non-reference plots, includes mean adn sd for rows and mean for columns
+
+load("processdata/data_species_wide_2020_06_26.rda")
+load("processdata/data_species_wide2_2020_06_26.rda") # Includes mean and sd of species for columns and rows
+load("processdata/data_species_wide2_reference_2020_06_29.rda") # Only reference plots, includes mean adn sd for rows and mean for columns
+load("processdata/data_species_wide2_normal_2020_06_29.rda") # Only non-reference plots, includes mean adn sd for rows and mean for columns
+
+head(data_species_wide)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
