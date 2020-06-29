@@ -262,20 +262,32 @@ fig_groundlayer_caco <- ggplot(data = data_plots, aes(x = caco, y = ground_layer
 str(data_species_wide)
 head(data_species_wide)
 
-
+#### Species occurrences (full dataset) ----
 count_species_occurrences <- colSums(data_species_wide != 0)
 count_species_occurrences_df <- stack(count_species_occurrences)
 count_species_occurrences_df <- setNames(stack(count_species_occurrences)[2:1], c('species','occurrences'))
 # # Why does this not work? count_species_occurrences_df <- arrange(count_species_occurrences_df, species) 
 # # Why does this not work? count_species_occurrences_df[ order(count_species_occurrences_df$species), ] 
+ggplot(count_species_occurrences_df, aes(occurrences, species)) +
+  geom_col() +
+  theme_classic()
+
+#### Species occurrences (reference dataset) ----
+count_species_occur_ref <- colSums(data_species_wide2_reference != 0)
+count_species_occur_ref_df <- stack(count_species_occur_ref)
+count_species_occur_ref_df <- setNames(stack(count_species_occur_ref)[2:1], c('species','occurrences'))
+
+ggplot(count_species_occur_ref_df, aes(occurrences, species)) +
+  geom_col() +
+  theme_classic()
+
+
 
 
 ```
 
 ```{r}
-ggplot(count_species_occurrences_df, aes(occurrences, species)) +
-  geom_col() +
-  theme_classic()
+
 
 ```
 
