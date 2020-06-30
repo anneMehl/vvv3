@@ -1,0 +1,78 @@
+---
+title: "vegantutor"
+output: word_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+library(vegan)
+library(MASS)
+
+data(varespec)
+head(varespec)
+
+```
+
+## NMDS species
+```{r}
+vare.dis <- vegdist(varespec)
+vare.mds0 <- isoMDS(vare.dis)
+
+stressplot(vare.mds0, vare.dis)
+ordiplot(vare.mds0, type = "t")
+```
+
+```{r}
+vare.mds <- metaMDS(varespec, trace = FALSE)
+vare.mds
+
+plot(vare.mds, type = "t")
+```
+
+```{r}
+data(varechem)
+head(varechem)
+rankindex(scale(varechem), varespec, c("euc","man","bray","jac","kul"))
+
+dis <- vegdist(decostand(varespec, "norm"), "euclid")
+dis <- vegdist(decostand(varespec, "hell"), "euclidean")
+
+```
+
+
+```{r}
+d <- vegdist(varespec, "bray", binary = TRUE)
+d <- designdist(varespec, "(A+B-2*J)/(A+B)")
+d <- designdist(varespec, "(b+c)/(2*a+b+c)", abcd=TRUE)
+```
+
+```{r}
+tmp <- wisconsin(sqrt(varespec))
+dis <- vegdist(tmp)
+vare.mds0 <- isoMDS(dis, trace = 0)
+pro <- procrustes(vare.mds, vare.mds0)
+pro
+
+plot(pro)
+plot(pro, kind = 2)
+```
+
+## NMDS environmental interpretation 
+```{r}
+data(varechem)
+ef <- envfit(vare.mds, varechem, permu = 999)
+ef
+
+plot(vare.mds, display = "sites")
+plot(ef, p.max = 0.1)
+
+
+```
+
