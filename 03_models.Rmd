@@ -1,0 +1,51 @@
+---
+title: "03_models"
+output: word_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+head(data_plots2)
+head(data_plots2_reference)
+head(data_species_wide2)
+head(data_species_wide2_normal)
+head(data_species_wide2_reference)
+
+```
+
+
+
+
+## To test for skrewness/ data distribution!
+```{r}
+library(fitdistrplus)
+
+descdist(data_plots2$field_layer_c, discrete = FALSE, boot = 500)
+descdist(data_plots2$shrub_layer_c, discrete = FALSE, boot = 500)
+descdist(data_plots2$tree_layer_c, discrete = FALSE, boot = 500)
+
+descdist(data_plots2$total_cover_layers, discrete = FALSE, boot = 500)
+
+```
+
+
+
+## Test for overdispersion
+```{r}
+overdisp_fun <- function(model) {
+    rdf <- df.residual(model)
+    rp <- residuals(model,type="pearson")
+    Pearson.chisq <- sum(rp^2)
+    prat <- Pearson.chisq/rdf
+    pval <- pchisq(Pearson.chisq, df=rdf, lower.tail=FALSE)
+    c(chisq=Pearson.chisq,ratio=prat,rdf=rdf,p=pval)
+}
+
+overdisp_fun(m3beta)
+```
