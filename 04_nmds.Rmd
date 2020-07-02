@@ -1,0 +1,55 @@
+---
+title: "04_nmds"
+output: word_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(vegan)
+library(MASS)
+
+head(data_species_wide2_normal)
+
+species_nmds <- data.frame(data_species_wide2_normal[, c(4:192)])
+str(species_nmds)
+
+
+species_nmds <- as.matrix(species_nmds)
+
+```
+
+## NMDS species
+```{r}
+vare.dis <- vegdist(species_nmds)
+vare.mds0 <- isoMDS(vare.dis)
+
+
+stressplot(vare.mds0, vare.dis)
+ordiplot(vare.mds0, type = "t")
+```
+
+```{r}
+vare.mds <- metaMDS(species_nmds, trace = FALSE)
+vare.mds
+
+plot(vare.mds, type = "t")
+```
+
+
+## NMDS environmental interpretation 
+```{r}
+data(varechem)
+ef <- envfit(vare.mds, varechem, permu = 999)
+ef
+
+plot(vare.mds, display = "sites")
+plot(ef, p.max = 0.1)
+
+
+```
