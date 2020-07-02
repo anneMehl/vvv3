@@ -57,7 +57,7 @@ corrplot(res)
 
 
 
-## -------------------- Linear mixed model with "total_cover_layers" as response -------------------
+## -------------------- Linear mixed model with "total_cover_layers" as response (excl. reference plots) -------------------
 
 ```{r}
 library(lme4)
@@ -180,7 +180,7 @@ plot_model(lm12, type = "diag")
 
 
 
-## -------------- Linear mixed model with "mean_cover" as response ------------------
+## -------------- Linear mixed model with "mean_cover" as response (excl. reference plots) ------------------
 
 ```{r}
 library(lme4)
