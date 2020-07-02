@@ -44,6 +44,12 @@ hist_ground_layer_c <- ggplot(data = data_plots, aes(ground_layer_c)) +
   theme_classic()
 
 
+hist_mean_cover <- ggplot(data = data_plots2_normal, aes(log10(mean_cover+1))) + 
+  geom_histogram() +
+  theme_classic()
+
+
+
 # mean.cl.normal computes 3 summary variables: the sample mean and lower and upper Gaussian confidence limits based on the t-distribution.
 
 
