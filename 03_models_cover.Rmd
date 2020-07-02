@@ -1,0 +1,290 @@
+---
+title: "03_models"
+output: word_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## ------------- head data ----------------
+```{r}
+head(data_plots2)
+head(data_plots2_normal)
+head(data_plots2_reference)
+
+head(data_species_wide2)
+head(data_species_wide2_normal)
+head(data_species_wide2_reference)
+
+```
+
+
+## ----------- Test for data distribution/ screwness ---------
+```{r}
+library(fitdistrplus)
+
+descdist(data_plots2_normal$field_layer_c, discrete = FALSE, boot = 500)
+descdist(data_plots2_normal$shrub_layer_c, discrete = FALSE, boot = 500)
+descdist(data_plots2_normal$tree_layer_c, discrete = FALSE, boot = 500)
+
+descdist(data_plots2_normal$total_cover_layers, discrete = FALSE, boot = 500)
+descdist(data_plots2_normal$mean_cover, discrete = FALSE, boot = 500)
+
+
+descdist(data_plots2_reference$field_layer_c, discrete = FALSE, boot = 500)
+descdist(data_plots2_reference$shrub_layer_c, discrete = FALSE, boot = 500)
+descdist(data_plots2_reference$tree_layer_c, discrete = FALSE, boot = 500)
+
+descdist(data_plots2_reference$total_cover_layers, discrete = FALSE, boot = 500)
+
+```
+
+
+## correlation
+```{r}
+cor_df <- data.frame(data_plots2_normal$bare_soil_c, data_plots2_normal$dist_int_veg, data_plots2_normal$field_layer_c, data_plots2_normal$shrub_layer_c, data_plots2_normal$tree_layer_c, data_plots2_normal$caco, data_plots2_normal$slope, data_plots2_normal$loi, data_plots2_normal$mean_cover, data_plots2_normal$sd_cover, data_plots2_normal$total_cover_layers)
+
+res <- cor(cor_df)
+
+library(Hmisc)
+library(corrplot)
+corrplot(res)
+
+```
+
+
+
+## -------------------- Linear mixed model with "total_cover_layers" as response -------------------
+
+```{r}
+library(lme4)
+library(lmerTest)
+
+#### random factor selection ----
+lm0_rand <- lmer(total_cover_layers ~ dist_int_veg + caco + slope + exposure + grain_size_stand_f + loi + method + site_type + (1|siteID/plotnumb), data = data_plots2_normal, REML = F) # Error: number of levels of each grouping factor must be < number of observations (problems: plotnumb:siteID)
+
+lm1_rand <- lmer(total_cover_layers ~ dist_int_veg + caco + slope + exposure + grain_size_stand_f + loi + method  + (1|siteID), data = data_plots2_normal, REML = F) #1
+
+lm2_rand <- lmer(total_cover_layers ~ dist_int_veg + caco + slope + exposure + grain_size_stand_f + loi + method  + (1|plotnumb), data = data_plots2_normal, REML = F)
+
+
+
+#### models ----
+lm0 <- lmer(total_cover_layers ~ dist_int_veg + caco + slope + exposure + grain_size_stand_f + loi + method + (1|siteID), data = data_plots2_normal, REML = F)
+lm1 <- lmer(total_cover_layers ~ dist_int_veg + (1|siteID), data = data_plots2_normal, REML = F)
+lm2 <- lmer(total_cover_layers ~ dist_int_veg + caco + (1|siteID), data = data_plots2_normal, REML = F) 
+lm3 <- lmer(total_cover_layers ~ dist_int_veg + caco + slope + (1|siteID), data = data_plots2_normal, REML = F)
+lm4 <- lmer(total_cover_layers ~ dist_int_veg + caco + slope + exposure + (1|siteID), data = data_plots2_normal, REML = F)
+lm5 <- lmer(total_cover_layers ~ dist_int_veg + caco + slope + exposure + grain_size_stand_f + (1|siteID), data = data_plots2_normal, REML = F)
+lm6 <- lmer(total_cover_layers ~ dist_int_veg + caco + slope + exposure + grain_size_stand_f + loi + (1|siteID), data = data_plots2_normal, REML = F)
+
+
+lm7 <- lmer(total_cover_layers ~ dist_int_veg + method + (1|siteID), data = data_plots2_normal, REML = F)
+lm8 <- lmer(total_cover_layers ~ dist_int_veg + method + caco + (1|siteID), data = data_plots2_normal, REML = F) 
+lm9 <- lmer(total_cover_layers ~  method + (1|siteID), data = data_plots2_normal, REML = F) #3
+
+lm10 <- lmer(total_cover_layers ~ method*dist_int_veg + (1|siteID), data = data_plots2_normal, REML = F) #2
+lm11 <- lmer(total_cover_layers ~ method*dist_int_veg + caco + (1|siteID), data = data_plots2_normal, REML = F)
+lm12 <- lmer(total_cover_layers ~ method*caco + (1|siteID), data = data_plots2_normal, REML = F) #1
+lm13 <- lmer(total_cover_layers ~ method*caco + loi + (1|siteID), data = data_plots2_normal, REML = F)
+lm14 <- lmer(total_cover_layers ~ method*caco + grain_size_stand_f + (1|siteID), data = data_plots2_normal, REML = F)
+lm15 <- lmer(total_cover_layers ~ method*loi + (1|siteID), data = data_plots2_normal, REML = F)
+```
+
+#### random factor selection
+```{r}
+library(lmerTest)
+AIC(lm1_rand, lm2_rand)
+#          df      AIC
+# lm1_rand 20 1970.204
+# lm2_rand 20 1974.224
+```
+
+
+
+#### model selection 
+```{r}
+drop1(lm0)
+
+s <- step(lm0)
+plot(s)
+
+library(AICcmodavg)
+# AIC(lm0, lm1, lm2, lm3, lm4, lm5, lm6)
+
+Cand.models <- list( )
+Cand.models[[1]] <- lmer(total_cover_layers ~ dist_int_veg + caco + slope + exposure + grain_size_stand_f + loi + method + (1|siteID), data = data_plots2_normal, REML = F)
+Cand.models[[2]] <- lmer(total_cover_layers ~ dist_int_veg + (1|siteID), data = data_plots2_normal, REML = F)
+Cand.models[[3]] <- lmer(total_cover_layers ~ dist_int_veg + caco + (1|siteID), data = data_plots2_normal, REML = F)
+Cand.models[[4]] <- lmer(total_cover_layers ~ dist_int_veg + caco + slope + (1|siteID), data = data_plots2_normal, REML = F)
+Cand.models[[5]] <- lmer(total_cover_layers ~ dist_int_veg + caco + slope + exposure + (1|siteID), data = data_plots2_normal, REML = F)
+Cand.models[[6]] <- lmer(total_cover_layers ~ dist_int_veg + caco + slope + exposure + grain_size_stand_f + (1|siteID), data = data_plots2_normal, REML = F)
+Cand.models[[7]] <- lmer(total_cover_layers ~ dist_int_veg + caco + slope + exposure + grain_size_stand_f + loi + (1|siteID), data = data_plots2_normal, REML = F)
+Cand.models[[8]] <- lmer(total_cover_layers ~ dist_int_veg + method + (1|siteID), data = data_plots2_normal, REML = F)
+Cand.models[[9]] <- lmer(total_cover_layers ~ dist_int_veg + method + caco + (1|siteID), data = data_plots2_normal, REML = F)
+Cand.models[[10]] <- lmer(total_cover_layers ~ method + (1|siteID), data = data_plots2_normal, REML = F)
+Cand.models[[11]] <- lmer(total_cover_layers ~ method*dist_int_veg + (1|siteID), data = data_plots2_normal, REML = F)
+Cand.models[[12]] <- lmer(total_cover_layers ~ method*dist_int_veg + caco + (1|siteID), data = data_plots2_normal, REML = F)
+Cand.models[[13]] <- lmer(total_cover_layers ~ method*caco + (1|siteID), data = data_plots2_normal, REML = F)
+Cand.models[[14]] <- lmer(total_cover_layers ~ method*caco + loi + (1|siteID), data = data_plots2_normal, REML = F)
+Cand.models[[15]] <- lmer(total_cover_layers ~ method*caco + grain_size_stand_f + (1|siteID), data = data_plots2_normal, REML = F)
+Cand.models[[16]] <- lmer(total_cover_layers ~ method*loi + (1|siteID), data = data_plots2_normal, REML = F)
+
+
+aictab(Cand.models, second.ord = F) 
+# Model selection based on AIC:
+# 
+#        K     AIC Delta_AIC AICWt Cum.Wt      LL
+# Mod13  8 1945.65      0.00  0.45   0.45 -964.83
+# Mod14  9 1947.30      1.64  0.20   0.65 -964.65
+# Mod11  8 1948.04      2.39  0.14   0.78 -966.02
+# Mod10  5 1949.45      3.80  0.07   0.85 -969.73
+# Mod12  9 1950.00      4.35  0.05   0.90 -966.00
+# Mod8   6 1950.83      5.17  0.03   0.93 -969.41
+# Mod15 11 1951.11      5.46  0.03   0.96 -964.56
+# Mod16  8 1951.48      5.83  0.02   0.99 -967.74
+# Mod9   7 1952.75      7.09  0.01   1.00 -969.37
+# Mod2   4 1960.19     14.53  0.00   1.00 -976.09
+# Mod3   5 1962.15     16.50  0.00   1.00 -976.08
+# Mod4   6 1963.00     17.35  0.00   1.00 -975.50
+# Mod1  20 1970.20     24.55  0.00   1.00 -965.10
+# Mod5  14 1973.21     27.56  0.00   1.00 -972.60
+# Mod6  17 1978.57     32.92  0.00   1.00 -972.29
+# Mod7  18 1980.21     34.56  0.00   1.00 -972.11
+
+
+summary(lm0) #full
+
+summary(lm9) #3
+summary(lm10) #2
+summary(lm12) #1
+```
+
+#### Checking assumptions
+```{r}
+library(sjPlot)
+plot_model(lm9, type = "diag")
+plot_model(lm10, type = "diag")
+plot_model(lm12, type = "diag")
+```
+
+
+
+
+
+
+
+
+
+
+## -------------- Linear mixed model with "mean_cover" as response ------------------
+
+```{r}
+library(lme4)
+library(lmerTest)
+
+#### random factor selection ----
+lm3_rand <- lmer(mean_cover ~ dist_int_veg + caco + slope + exposure + grain_size_stand_f + loi + method + site_type + (1|siteID/plotnumb), data = data_plots2_normal, REML = F) # Error: number of levels of each grouping factor must be < number of observations (problems: plotnumb:siteID)
+
+lm4_rand <- lmer(mean_cover ~ dist_int_veg + caco + slope + exposure + grain_size_stand_f + loi + method  + (1|siteID), data = data_plots2_normal, REML = F) #1
+
+lm5_rand <- lmer(mean_cover ~ dist_int_veg + caco + slope + exposure + grain_size_stand_f + loi + method  + (1|plotnumb), data = data_plots2_normal, REML = F)
+
+
+
+#### models ----
+lm16 <- lmer(mean_cover ~ dist_int_veg + caco + slope + exposure + grain_size_stand_f + loi + method + (1|siteID), data = data_plots2_normal, REML = F)
+lm16a <- lmer(mean_cover ~ log(dist_int_veg+1) + caco + slope + exposure + grain_size_stand_f + log(loi+1) + method + (1|siteID), data = data_plots2_normal, REML = F)
+lm17 <- lmer(mean_cover ~ method + (1|siteID), data = data_plots2_normal, REML = F) #3
+lm18 <- lmer(mean_cover ~ method + exposure + (1|siteID), data = data_plots2_normal, REML = F) 
+lm19 <- lmer(mean_cover ~ method + grain_size_stand_f + (1|siteID), data = data_plots2_normal, REML = F)
+lm20 <- lmer(mean_cover ~ method + loi + (1|siteID), data = data_plots2_normal, REML = F) 
+
+lm21 <- lmer(mean_cover ~ method*loi + (1|siteID), data = data_plots2_normal, REML = F) #2
+lm22 <- lmer(mean_cover ~ method*grain_size_stand_f + (1|siteID), data = data_plots2_normal, REML = F)
+lm23 <- lmer(mean_cover ~ method*log(loi+1) + (1|siteID), data = data_plots2_normal, REML = F) #1
+lm24 <- lmer(mean_cover ~ method*log(loi+1) + log(dist_int_veg+1) + (1|siteID), data = data_plots2_normal, REML = F)
+
+lm25 <- lmer(log(mean_cover+1) ~ method*log(loi+1) + (1|siteID), data = data_plots2_normal, REML = F)
+
+lm21_REML <- lmer(mean_cover ~ method*log(loi+1) + (1|siteID), data = data_plots2_normal, REML = T) #1
+lm25_REML <- lmer(log(mean_cover+1) ~ method*log(loi+1) + (1|siteID), data = data_plots2_normal, REML = T)
+
+```
+
+#### random factor selection
+```{r}
+library(lmerTest)
+AIC(lm1_rand, lm2_rand)
+#          df      AIC
+# lm1_rand 20 1970.204
+# lm2_rand 20 1974.224
+```
+
+
+
+#### model selection 
+```{r}
+drop1(lm16)
+
+s <- step(lm16)
+plot(s)
+
+library(AICcmodavg)
+# AIC(lm0, lm1, lm2, lm3, lm4, lm5, lm6)
+
+Cand.models <- list( )
+Cand.models[[1]] <- lmer(mean_cover ~ dist_int_veg + caco + slope + exposure + grain_size_stand_f + loi + method + (1|siteID), data = data_plots2_normal, REML = F)
+Cand.models[[2]] <- lmer(mean_cover ~ method + (1|siteID), data = data_plots2_normal, REML = F) #3
+Cand.models[[3]] <- lmer(mean_cover ~ method + exposure + (1|siteID), data = data_plots2_normal, REML = F) 
+Cand.models[[4]] <- lmer(mean_cover ~ method + grain_size_stand_f + (1|siteID), data = data_plots2_normal, REML = F)
+Cand.models[[5]] <- lmer(mean_cover ~ method + loi + (1|siteID), data = data_plots2_normal, REML = F)
+Cand.models[[6]] <- lmer(mean_cover ~ method*loi + (1|siteID), data = data_plots2_normal, REML = F) #2
+Cand.models[[7]] <- lmer(mean_cover ~ method*grain_size_stand_f + (1|siteID), data = data_plots2_normal, REML = F)
+Cand.models[[8]] <- lmer(mean_cover ~ method*log(loi+1) + (1|siteID), data = data_plots2_normal, REML = F)#1
+Cand.models[[9]] <- lmer(mean_cover ~ log(dist_int_veg+1) + caco + slope + exposure + grain_size_stand_f + log(loi+1) + method + (1|siteID), data = data_plots2_normal, REML = F)
+Cand.models[[10]] <- lmer(mean_cover ~ method*log(loi+1) + log(dist_int_veg+1) + (1|siteID), data = data_plots2_normal, REML = F)
+
+aictab(Cand.models, second.ord = F) 
+#       K   AIC Delta_AIC AICWt Cum.Wt    LL
+# Mod8  8 -7.25      0.00  0.62   0.62 11.62
+# Mod6  8 -4.60      2.64  0.16   0.78 10.30
+# Mod2  5 -3.96      3.29  0.12   0.90  6.98
+# Mod5  6 -2.91      4.34  0.07   0.97  7.45
+# Mod3 13  0.37      7.62  0.01   0.98 12.81
+# Mod4  8  0.94      8.18  0.01   0.99  7.53
+# Mod7 13  2.37      9.62  0.01   1.00 11.81
+# Mod9 20  8.75     16.00  0.00   1.00 15.63
+# Mod1 20  9.12     16.37  0.00   1.00 15.44
+
+
+summary(lm16) #full
+
+summary(lm21_REML)
+anova(lm21_REML)
+
+```
+
+#### Checking assumptions
+```{r}
+library(sjPlot)
+plot_model(lm21_REML, type = "diag")
+plot_model(lm25, type = "diag")
+
+```
+
+#### Plot results
+```{r}
+plot_model(lm21_REML, type = "est", show.intercept = T)
+plot_model(lm21_REML, type = "eff")
+
+plot_model(lm25_REML, type = "est", show.intercept = T)
+plot_model(lm25_REML, type = "eff")
+
+```
+
+
+
