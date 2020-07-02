@@ -51,6 +51,7 @@ str(data_plots)
 
 #### change some character variables to factor
 ```{r}
+#### data set "data_plots" ----
 data_plots$site <- as.factor(data_plots$site)
 str(data_plots$site)
 
@@ -65,6 +66,11 @@ str(data_plots$grain_size_stand_f)
 
 data_plots$grain_size_f <- as.factor(data_plots$grain_size)
 str(data_plots$grain_size_f)
+
+
+#### data set "data_plots2_normal" ----
+data_plots2_normal$plotnumb <- as.factor(data_plots2_normal$plotnum)
+str(data_plots2_normal$plotnum)
 
 ```
 
@@ -195,11 +201,14 @@ save(data_plots, file = "data_plots_2020_06_25.rda")
 save(data_plots2, file = "data_plots2_2020_06_29.rda") # Like data_plots, but inluding column with mean cover and sd (species), total_cover_layers
 save(data_plots2_reference, file = "data_plots2_reference_2020_06_29.rda") # Like data_plots2, but only reference plots
 save(data_plots2_normal, file = "data_plots2_normal_2020_06_29.rda") # Like data_plots2, but only non-reference plots
+save(data_plots2_normal, file = "data_plots2_normal_2020_07_02.rda") # Like data_plots2_normal, but plotnumb as factor
+
 
 load("processdata/data_plots_2020_06_25.rda")
 load("processdata/data_plots2_2020_06_29.rda") # Like data_plots, but inluding column with mean cover and sd (species)
 load("processdata/data_plots2_reference_2020_06_29.rda") # Like data_plots2, but only reference plots
 load("processdata/data_plots2_normal_2020_06_29.rda") # Like data_plots2, but only non-reference plots
+load("processdata/data_plots2_normal_2020_07_02.rda") # Like data_plots2_normal, but plotnumb as factor
 ```
 
 
