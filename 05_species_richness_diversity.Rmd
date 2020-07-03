@@ -1,0 +1,27 @@
+---
+title: "05_species_richness_diversity"
+output: word_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+library(vegan)
+library(MASS)
+
+head(data_species_wide2_normal)
+
+species <- data.frame(data_species_wide2_normal[, c(1, 4:192)])
+str(species)
+# species_nmds[, 1:189] <- sapply(species_nmds[, 1:189], as.integer)
+
+
+
+
+```
