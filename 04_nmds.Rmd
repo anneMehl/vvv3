@@ -18,7 +18,7 @@ head(data_species_wide2_normal)
 
 species_nmds <- data.frame(data_species_wide2_normal[, c(4:192)])
 str(species_nmds)
-
+species_nmds[, 1:189] <- sapply(species_nmds[, 1:189], as.integer)
 
 species_nmds <- as.matrix(species_nmds)
 
@@ -26,7 +26,7 @@ species_nmds <- as.matrix(species_nmds)
 
 ## NMDS species
 ```{r}
-vare.dis <- vegdist(species_nmds)
+vare.dis <- vegdist(species_nmds, method = "morisita")
 vare.mds0 <- isoMDS(vare.dis)
 
 
@@ -35,16 +35,22 @@ ordiplot(vare.mds0, type = "t")
 ```
 
 ```{r}
-vare.mds <- metaMDS(species_nmds, trace = FALSE)
+vare.mds <- metaMDS(species_nmds, trace = FALSE, distance = "morisita")
 vare.mds
 
-plot(vare.mds, type = "t")
+plot(vare.mds, type = "t", display = "sites")
 ```
 
 
 ## NMDS environmental interpretation 
+
+```{r}
+
+```
+
 ```{r}
 data(varechem)
+
 ef <- envfit(vare.mds, varechem, permu = 999)
 ef
 
