@@ -14,14 +14,88 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(vegan)
 library(MASS)
+library(plyr)
 
+load("processdata/data_species_wide2_normal_2020_06_29.rda")
 head(data_species_wide2_normal)
+names(data_species_wide2_normal)
 
-species <- data.frame(data_species_wide2_normal[, c(1, 4:192)])
-str(species)
-# species_nmds[, 1:189] <- sapply(species_nmds[, 1:189], as.integer)
+species_plots <- data.frame(data_species_wide2_normal[, c(1, 4:192)])
+str(species_plots)
+
+species_sites <- data.frame(data_species_wide2_normal[, c(2, 4:192)])
+str(species_sites)
 
 
+```
 
+## Species richness (count of species)
+```{r}
+# sum up the number of non-zero entries per row (1)
+# the first column is ignored [,-1] as it is a site name, not a species count.
+
+sr_plot <- ddply(species_plots, ~ id, function(x) {
+data.frame(richness = sum(x[-1]>0))
+})
+
+sr_site <- ddply(species_sites, ~ site_id, function(x) {
+data.frame(richness = sum(x[-1]>0))
+})
+
+```
+
+
+## Menhinick's index (to account for sampling effort)
+...is simply the number of species (n) divided by the square-root of the total number of individuals (N)
+```{r}
+menhinick <- function(x) {sum(x>0)/sqrt(sum(x))
+}
+
+sr_plots_menhinick <- ddply(species_plots, ~id, function(x) {data.frame(richness = menhinick(x[-1]))
+  })
+
+sr_sites_menhinick <- ddply(species_sites, ~site_id, function(x) {data.frame(richness = menhinick(x[-1]))
+  })
+
+```
+
+
+## Margalef's index (to account for sampling effort)
+...is the number of species (n) minus 1 divided by the natural logarithm of the total number of individuals (N).
+```{r}
+margalef <- function(x) {(sum(x>0)-1)/log(sum(x))
+  }
+sr_plots_margalef <- ddply(species_plots, ~id, function(x) {data.frame(richness = margalef(x[-1]))
+  })
+
+sr_sites_margalef <- ddply(species_sites, ~site_id, function(x) {data.frame(richness = margalef(x[-1]))
+  })
+
+
+```
+
+
+## Shannon-Wiener diversity Index
+```{r}
+
+diversity_plots_shannon <- ddply(species_plots, ~id,function(x) {data.frame(shannon = diversity(x[-1], index = "shannon"))
+  })
+
+diversity_sites_shannon <- ddply(species_sites, ~site_id,function(x) {data.frame(shannon = diversity(x[-1], index = "shannon"))
+  })
+#### Need to summarize data per site in the species_sites dataframe, so that I get 29 sites and not plots...
+
+```
+
+
+## Simpson's diversity Index
+```{r}
+
+diversity_plots_simpsons <- ddply(species_plots, ~id,function(x) {data.frame(simpson = diversity(x[-1], index = "simpson"))
+  })
+
+diversity_sites_simpsons <- ddply(species_sites, ~site_id,function(x) {data.frame(simpson = diversity(x[-1], index = "simpson"))
+  })
+#### Need to summarize data per site in the species_sites dataframe, so that I get 29 sites and not plots...
 
 ```
