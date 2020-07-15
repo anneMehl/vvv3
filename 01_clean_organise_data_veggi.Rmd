@@ -124,11 +124,12 @@ data_plots$reference <- as.factor(data_plots$reference)
 ```
 
 
-#### Rename variable site
+#### Rename variables
 ```{r}
 data_plots <- data_plots %>% 
   rename(
     site_type = site)
+
 
 ```
 
@@ -265,11 +266,12 @@ nrow(na.omit(data_species_wide)) # 0 NAs
 library(tidyverse)
 
 data_species_wide <- data_species_wide %>%
-  separate(ID, into = c(NA, "plotID"), remove = F) # Can also use  sep = "."  to specify the seperator , convert = TRUE
+  separate(id, into = c(NA, "plot_id"), remove = F) # Can also use  sep = "."  to specify the seperator , convert = TRUE
 data_species_wide <- data_species_wide %>%
-  separate(ID, into = c("siteID", NA), remove = F) # Can also use  sep = "."  to specify the seperator , convert = TRUE
+  separate(id, into = c("site_id", NA), remove = F) # Can also use  sep = "."  to specify the seperator , convert = TRUE
 
-data_species_wide$siteID <- as.factor(data_species_wide$siteID)
+data_species_wide$plot_id <- as.factor(data_species_wide$plot_id)
+data_species_wide$site_id <- as.factor(data_species_wide$site_id)
 
   
   
@@ -278,33 +280,33 @@ data_species_wide$siteID <- as.factor(data_species_wide$siteID)
 
 #### Add a column with reference plot yes or no
 ```{r}
-data_species_wide$plotID <- as.numeric(data_species_wide$plotID)
-data_species_wide$reference <- ifelse(data_species_wide$plotID > 8, "yes", "no")
+data_species_wide$plot_id <- as.numeric(data_species_wide$plot_id)
+data_species_wide$reference <- ifelse(data_species_wide$plot_id > 8, "yes", "no")
 
 data_species_wide$reference <- as.factor(data_species_wide$reference)
-data_species_wide$plotID <- as.factor(data_species_wide$plotID)
+data_species_wide$plot_id <- as.factor(data_species_wide$plot_id)
 
-str(data_species_wide$plotID)
-str(data_species_wide$siteID)
+str(data_species_wide$plot_id)
+str(data_species_wide$site_id)
 str(data_species_wide$reference)
 
-head(data_species_wide$plotID, n = 25L)
+head(data_species_wide$plot_id, n = 25L)
 head(data_species_wide$reference, n = 25L)
 
 ```
 
-#### Remove space and dots in species names
+#### Remove spaces, dots and capital letters in variable names
 ```{r}
-library(janitor)
-
-data_species_wide <- data_species_wide %>%
-  clean_names()
+# library(janitor)
+# 
+# data_species_wide <- data_species_wide %>%
+#   clean_names()
 
 ```
 
 
 
-#### Summarise over columns
+#### Summarise cover for each column
 ```{r}
 ## create a list with function to use over each column
 mean_sd <- list(
@@ -318,7 +320,7 @@ mean_sd <- list(
 data_species_wide_site_mean_sd <- data_species_wide %>%
   group_by(site_id) %>%
   summarise(
-    across(anemone_nemorosa:lolium_perenne, mean_sd),
+    across(taraxacum_sp:lolium_perenne, mean_sd),
      
   )
 
@@ -336,102 +338,92 @@ data_species_wide_sd <- data_species_wide %>%
      
   )
 
-## If preferred, add the rows to (existing) dataframe
-data_species_wide_temp <- bind_rows(data_species_wide, data_species_wide_mean)
-data_species_wide_2 <- bind_rows(data_species_wide_temp, data_species_wide_sd)
+#### If preferred, add the rows to (existing) dataframe:
+
+# data_species_wide_temp <- bind_rows(data_species_wide, data_species_wide_mean)
+# data_species_wide_2 <- bind_rows(data_species_wide_temp, data_species_wide_sd)
 
 
 ```
 
-#### Summarise over rows
+#### Summarise cover for each row (plot/ site)
 ```{r}
 # use c_across() to more easily select many variables
-data_species_wide2 <- data_species_wide2 %>% rowwise() %>% 
-  mutate(m = mean(c_across(taraxacum_sp:lolium_perenne))) %>%
-  mutate(sd = sd(c_across(taraxacum_sp:lolium_perenne)))
+data_species_wide2 <- data_species_wide %>% rowwise() %>% 
+  mutate(mean_cover = mean(c_across(taraxacum_sp:lolium_perenne))) %>%
+  mutate(sd_cover = sd(c_across(taraxacum_sp:lolium_perenne)))
 
 ```
+
+
+
+
+
+
+#### Rename variables
+```{r}
+data_species_wide3 <- data_species_wide3 %>% 
+  rename(
+    mean_plot_cover = m)
+
+data_species_wide3 <- data_species_wide3 %>% 
+  rename(
+    sd_plot_cover = sd)
+
+```
+
+
+
+
+
 
 #### Subset all reference plots
 ```{r}
-data_species_wide2_reference <- filter(data_species_wide2, reference == "yes")
-data_species_wide2_reference <- as.data.frame(data_species_wide2_reference)
+#### Use latest dataframe here ----
+data_species_wide3_reference <- filter(data_species_wide3, reference == "yes")
+data_species_wide3_reference <- as.data.frame(data_species_wide3_reference)
+
+
+data_species_wide3_sites_reference <- filter(data_species_wide3_sites, reference == "yes")
+data_species_wide3_sites_reference <- as.data.frame(data_species_wide3_sites_reference)
 
 ```
 
 
-#### Summarise over columns in reference data
+#### Subset all normal (non-reference) plots
 ```{r}
-data_species_wide2_reference_mean <- data_species_wide2_reference %>%
-  summarise(
-    across(taraxacum_sp:lolium_perenne, mean),
-     
-  )
-
-##### Why the hell does this not work??
-
-# data_species_wide2_reference_sd <- data_species_wide2_reference %>%
-#   summarise(
-#     across(taraxacum_sp:lolium_perenne, sd),
-#      
-#   ) 
-
-
-data_species_wide2_reference <- bind_rows(data_species_wide2_reference, data_species_wide2_reference_mean)
-# data_species_wide2_reference <- bind_rows(data_species_wide2_reference, data_species_wide2_reference_sd)
+#### Use latest dataframe here ----
+data_species_wide3_normal <- filter(data_species_wide3, reference == "no")
+data_species_wide3_normal <- as.data.frame(data_species_wide3_normal)
 
 ```
-
-#### Subset all non-reference plots
-```{r}
-data_species_wide2_normal <- filter(data_species_wide2, reference == "no")
-data_species_wide2_normal <- as.data.frame(data_species_wide2_normal)
-
-```
-
-
-#### Summarise over columns in reference data
-```{r}
-data_species_wide2_normal_mean <- data_species_wide2_normal %>%
-  summarise(
-    across(taraxacum_sp:lolium_perenne, mean),
-     
-  )
-
-##### Why the hell does this not work??
-
-# data_species_wide2_normal_sd <- data_species_wide2_normal %>%
-#   summarise(
-#     across(taraxacum_sp:lolium_perenne, sd),
-# 
-#   )
-
-
-data_species_wide2_normal <- bind_rows(data_species_wide2_normal, data_species_wide2_normal_mean)
-# data_species_wide2_reference <- bind_rows(data_species_wide2_reference, data_species_wide2_reference_sd)
-
-```
-
-
-#### ID as factor (for reference dataset)
-```{r}
-data_species_wide2_reference$id <- as.factor(data_species_wide2_reference$id)
-
-```
-
 
 
 #### Save new data/ changes
 ```{r}
 save(data_species_wide, file = "data_species_wide_2020_06_26.rda")
-save(data_species_wide2, file = "data_species_wide2_2020_06_26.rda") # Includes mean and sd of species for both columns and rows
-save(data_species_wide2_reference, file = "data_species_wide2_reference_2020_06_29.rda") # Only reference plots, includes mean adn sd for rows and mean for columns
-save(data_species_wide2_normal, file = "data_species_wide2_normal_2020_06_29.rda") # Only non-reference plots, includes mean adn sd for rows and mean for columns
+
+# Includes columns with species cover mean and sd:
+# save(data_species_wide2, file = "data_species_wide2_2020_06_26.rda") 
+save(data_species_wide2, file = "data_species_wide2_2020_07_15.rda")
+
+
+# Only reference plots - Includes columns with mean and sd for species cover, species richness measures and species diversity measures:
+save(data_species_wide3_reference, file = "data_species_wide3_reference_2020_07_15.rda")
+# Only normal (non-reference) plots - Includes columns with mean and sd for species cover, species richness measures and species diversity measures:
+save(data_species_wide3_normal, file = "data_species_wide3_normal_2020_07_15.rda")
+
+
 
 load("processdata/data_species_wide_2020_06_26.rda")
-load("processdata/data_species_wide2_2020_06_26.rda") # Includes mean and sd of species for columns and rows
-load("processdata/data_species_wide2_reference_2020_06_29.rda") # Only reference plots, includes mean adn sd for rows and mean for columns
-load("processdata/data_species_wide2_normal_2020_06_29.rda") # Only non-reference plots, includes mean adn sd for rows and mean for columns
+
+#### OBS! somehow the plot and site id columns are wrong in this version...
+# # Includes columns with species cover mean and sd:
+# load("processdata/data_species_wide2_2020_07_15.rda") 
+
+# Like data_species_wide2 but grouped by site id:
+load("processdata/data_species_wide2_sites_2020_07_15.rda")
+
 
 head(data_species_wide)
 
