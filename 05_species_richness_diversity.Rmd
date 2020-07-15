@@ -15,17 +15,34 @@ knitr::opts_chunk$set(echo = TRUE)
 library(vegan)
 library(MASS)
 library(plyr)
+library(tidyverse)
 
-load("processdata/data_species_wide2_normal_2020_06_29.rda")
-head(data_species_wide2_normal)
-names(data_species_wide2_normal)
+load("processdata/data_species_wide2_2020_07_15.rda")
+load() # data_species_wide2_sites_ref and data_species_wide2_sites_nor
 
-species_plots <- data.frame(data_species_wide2_normal[, c(1, 4:192)])
+head(data_species_wide2)
+names(data_species_wide2)
+
+#### Create dataframes grouped by sites and one for reference plots and one for normal plots
+# data_species_wide2_sites_nor <- data_species_wide2 %>%
+#   filter(reference == "no")
+# 
+# data_species_wide2_sites_ref <- data_species_wide2 %>%
+#   filter(reference == "yes")
+
+
+
+species_plots <- data.frame(data_species_wide2[, c(1, 4:192)])
 str(species_plots)
 
-species_sites <- data.frame(data_species_wide2_normal[, c(2, 4:192)])
+species_sites <- data.frame(data_species_wide2[, c(2, 4:192)])
 str(species_sites)
 
+species_sites <- species_sites %>%
+  group_by(site_id) %>%
+  summarise(
+    across(taraxacum_sp:lolium_perenne, sum),
+    )
 
 ```
 
@@ -51,10 +68,10 @@ data.frame(richness = sum(x[-1]>0))
 menhinick <- function(x) {sum(x>0)/sqrt(sum(x))
 }
 
-sr_plots_menhinick <- ddply(species_plots, ~id, function(x) {data.frame(richness = menhinick(x[-1]))
+sr_plots_menhinick <- ddply(species_plots, ~id, function(x) {data.frame(sr_menhinick = menhinick(x[-1]))
   })
 
-sr_sites_menhinick <- ddply(species_sites, ~site_id, function(x) {data.frame(richness = menhinick(x[-1]))
+sr_sites_menhinick <- ddply(species_sites, ~site_id, function(x) {data.frame(sr_menhinick = menhinick(x[-1]))
   })
 
 ```
@@ -65,10 +82,10 @@ sr_sites_menhinick <- ddply(species_sites, ~site_id, function(x) {data.frame(ric
 ```{r}
 margalef <- function(x) {(sum(x>0)-1)/log(sum(x))
   }
-sr_plots_margalef <- ddply(species_plots, ~id, function(x) {data.frame(richness = margalef(x[-1]))
+sr_plots_margalef <- ddply(species_plots, ~id, function(x) {data.frame(sr_margalef = margalef(x[-1]))
   })
 
-sr_sites_margalef <- ddply(species_sites, ~site_id, function(x) {data.frame(richness = margalef(x[-1]))
+sr_sites_margalef <- ddply(species_sites, ~site_id, function(x) {data.frame(sr_margalef = margalef(x[-1]))
   })
 
 
@@ -81,9 +98,10 @@ sr_sites_margalef <- ddply(species_sites, ~site_id, function(x) {data.frame(rich
 diversity_plots_shannon <- ddply(species_plots, ~id,function(x) {data.frame(shannon = diversity(x[-1], index = "shannon"))
   })
 
+
 diversity_sites_shannon <- ddply(species_sites, ~site_id,function(x) {data.frame(shannon = diversity(x[-1], index = "shannon"))
   })
-#### Need to summarize data per site in the species_sites dataframe, so that I get 29 sites and not plots...
+
 
 ```
 
@@ -94,8 +112,50 @@ diversity_sites_shannon <- ddply(species_sites, ~site_id,function(x) {data.frame
 diversity_plots_simpsons <- ddply(species_plots, ~id,function(x) {data.frame(simpson = diversity(x[-1], index = "simpson"))
   })
 
+
 diversity_sites_simpsons <- ddply(species_sites, ~site_id,function(x) {data.frame(simpson = diversity(x[-1], index = "simpson"))
   })
-#### Need to summarize data per site in the species_sites dataframe, so that I get 29 sites and not plots...
+
 
 ```
+
+
+## Add SR and diversity to dataframes
+```{r} 
+data_species_wide3 <- data_species_wide2 %>% 
+  left_join(diversity_plots_shannon) %>% 
+  left_join(diversity_plots_simpsons) %>% 
+  left_join(sr_plots_menhinick) %>%
+  left_join(sr_plots_margalef) %>%
+  as.data.frame()
+
+
+data_species_wide3_sites <- data_species_wide2_sites %>% 
+  left_join(diversity_sites_shannon) %>% 
+  left_join(diversity_sites_simpsons) %>% 
+  left_join(sr_sites_menhinick) %>%
+  left_join(sr_sites_margalef) %>%
+  as.data.frame()
+
+
+```
+
+
+## Save
+```{r}
+save(data_species_wide2_sites_nor, file = "data_species_wide2_sites_nor_2020_07_15.rda")
+save(data_species_wide2_sites_ref, file = "data_species_wide2_sites_ref_2020_07_15.rda")
+
+
+
+# Includes columns with mean and sd for species cover, species richness measures and species diversity measures (for both normal- and reference plots):
+save(data_species_wide3, file = "data_species_wide3_2020_07_15.rda")
+
+# Includes columns with mean and sd for species cover, species richness measures and species diversity measures; grouped by site id (for both normal- and reference plots):
+save(data_species_wide3_sites, file = "data_species_wide3_sites_2020_07_15.rda")
+
+```
+
+
+
+
