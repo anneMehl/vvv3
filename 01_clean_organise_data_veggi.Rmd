@@ -196,20 +196,60 @@ data_plots2_normal <- as.data.frame(data_plots2_normal)
 ```
 
 
+
+#### Rename variables
+```{r}
+data_plots2 <- data_plots2 %>% 
+  rename(
+    id = ID)
+
+data_plots2 <- data_plots2 %>% 
+  rename(
+    site_id = siteID)
+
+data_plots2 <- data_plots2 %>% 
+  rename(
+    plot_id = plotnumb)
+
+
+```
+
+
+
+#### Add columns with species richness and diversity from the species dataframes to the plots dataframes
+Start with the dataframe which includes both normal and reference plots
+```{r}
+
+species_diversity <- data_species_wide3[, c(1, 196:199)]
+
+data_plots3 <- data_plots2 %>% 
+  left_join(species_diversity) %>%
+  as.data.frame()
+
+sum(is.na(data_plots3))
+
+```
+
+
+
+
+
+
 #### Save changes of data
 ```{r}
 save(data_plots, file = "data_plots_2020_06_25.rda")
 save(data_plots2, file = "data_plots2_2020_06_29.rda") # Like data_plots, but inluding column with mean cover and sd (species), total_cover_layers
-save(data_plots2_reference, file = "data_plots2_reference_2020_06_29.rda") # Like data_plots2, but only reference plots
-save(data_plots2_normal, file = "data_plots2_normal_2020_06_29.rda") # Like data_plots2, but only non-reference plots
-save(data_plots2_normal, file = "data_plots2_normal_2020_07_02.rda") # Like data_plots2_normal, but plotnumb as factor
+save(data_plots2_reference, file = "data_plots2_reference_2020_07_16.rda") # Like data_plots2, but only reference plots
+save(data_plots2_normal, file = "data_plots2_normal_2020_07_16.rda") # Like data_plots2, but only normal plots
+save(data_plots3, file = "data_plots3_2020_07_16.rda") # Like data_plots2, but species richness and diversity
 
 
 load("processdata/data_plots_2020_06_25.rda")
-load("processdata/data_plots2_2020_06_29.rda") # Like data_plots, but inluding column with mean cover and sd (species)
+load("processdata/data_plots2_2020_06_29.rda") # Like data_plots, but inluding column with mean cover and sd (species cover)
 load("processdata/data_plots2_reference_2020_06_29.rda") # Like data_plots2, but only reference plots
-load("processdata/data_plots2_normal_2020_06_29.rda") # Like data_plots2, but only non-reference plots
-load("processdata/data_plots2_normal_2020_07_02.rda") # Like data_plots2_normal, but plotnumb as factor
+load("processdata/data_plots2_normal_2020_06_29.rda") # Like data_plots2, but only normal (non-reference) plots
+load("processdata/data_plots3_2020_07_16.rda") # Like data_plots2, but species richness and diversity
+
 ```
 
 
