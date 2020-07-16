@@ -49,6 +49,10 @@ hist_mean_cover <- ggplot(data = data_plots2_normal, aes(log10(mean_cover+1))) +
   theme_classic()
 
 
+hist_total_cover_layers <- ggplot(data = data_plots3, aes(total_cover_layers)) + 
+  geom_histogram() +
+  theme_classic()
+
 
 # mean.cl.normal computes 3 summary variables: the sample mean and lower and upper Gaussian confidence limits based on the t-distribution.
 
@@ -238,7 +242,7 @@ fig_groundlayer_dist_int_veg <- ggplot(data = data_plots, aes(x = dist_int_veg, 
 
 
 #### field- and shrub cover vs. caco ----
-hist_caco <- ggplot(data = data_plots, aes(caco)) + 
+hist_caco <- ggplot(data = data_plots3, aes(caco)) + 
   geom_histogram() +
   theme_classic()
 
