@@ -18,7 +18,8 @@ library(plyr)
 library(tidyverse)
 
 load("processdata/data_species_wide2_2020_07_15.rda")
-load() # data_species_wide2_sites_ref and data_species_wide2_sites_nor
+load("processdata/data_species_wide2_sites_ref_2020_07_15.rda")
+load("processdata/data_species_wide2_sites_nor_2020_07_15.rda")
 
 head(data_species_wide2)
 names(data_species_wide2)
@@ -44,6 +45,25 @@ species_sites <- species_sites %>%
     across(taraxacum_sp:lolium_perenne, sum),
     )
 
+
+species_sites_nor <- data.frame(data_species_wide2_sites_nor[, c(2, 4:192)])
+str(species_sites_nor)
+
+species_sites_nor <- species_sites_nor %>%
+  group_by(site_id) %>%
+  summarise(
+    across(taraxacum_sp:lolium_perenne, sum),
+    )
+
+species_sites_ref <- data.frame(data_species_wide2_sites_ref[, c(2, 4:192)])
+str(species_sites_ref)
+
+species_sites_ref <- species_sites_ref %>%
+  group_by(site_id) %>%
+  summarise(
+    across(taraxacum_sp:lolium_perenne, sum),
+    )
+
 ```
 
 ## Species richness (count of species)
@@ -55,7 +75,16 @@ sr_plot <- ddply(species_plots, ~ id, function(x) {
 data.frame(richness = sum(x[-1]>0))
 })
 
+
 sr_site <- ddply(species_sites, ~ site_id, function(x) {
+data.frame(richness = sum(x[-1]>0))
+})
+
+sr_site_nor <- ddply(species_sites_nor, ~ site_id, function(x) {
+data.frame(richness = sum(x[-1]>0))
+})
+
+sr_site_ref <- ddply(species_sites_ref, ~ site_id, function(x) {
 data.frame(richness = sum(x[-1]>0))
 })
 
@@ -71,7 +100,14 @@ menhinick <- function(x) {sum(x>0)/sqrt(sum(x))
 sr_plots_menhinick <- ddply(species_plots, ~id, function(x) {data.frame(sr_menhinick = menhinick(x[-1]))
   })
 
+
 sr_sites_menhinick <- ddply(species_sites, ~site_id, function(x) {data.frame(sr_menhinick = menhinick(x[-1]))
+  })
+
+sr_sites_nor_menhinick <- ddply(species_sites_nor, ~site_id, function(x) {data.frame(sr_menhinick = menhinick(x[-1]))
+  })
+
+sr_sites_ref_menhinick <- ddply(species_sites_ref, ~site_id, function(x) {data.frame(sr_menhinick = menhinick(x[-1]))
   })
 
 ```
@@ -85,9 +121,15 @@ margalef <- function(x) {(sum(x>0)-1)/log(sum(x))
 sr_plots_margalef <- ddply(species_plots, ~id, function(x) {data.frame(sr_margalef = margalef(x[-1]))
   })
 
+
 sr_sites_margalef <- ddply(species_sites, ~site_id, function(x) {data.frame(sr_margalef = margalef(x[-1]))
   })
 
+sr_sites_nor_margalef <- ddply(species_sites_nor, ~site_id, function(x) {data.frame(sr_margalef = margalef(x[-1]))
+  })
+
+sr_sites_ref_margalef <- ddply(species_sites_ref, ~site_id, function(x) {data.frame(sr_margalef = margalef(x[-1]))
+  })
 
 ```
 
@@ -102,6 +144,12 @@ diversity_plots_shannon <- ddply(species_plots, ~id,function(x) {data.frame(shan
 diversity_sites_shannon <- ddply(species_sites, ~site_id,function(x) {data.frame(shannon = diversity(x[-1], index = "shannon"))
   })
 
+diversity_sites_nor_shannon <- ddply(species_sites_nor, ~site_id,function(x) {data.frame(shannon = diversity(x[-1], index = "shannon"))
+  })
+
+diversity_sites_ref_shannon <- ddply(species_sites_ref, ~site_id,function(x) {data.frame(shannon = diversity(x[-1], index = "shannon"))
+  })
+
 
 ```
 
@@ -114,6 +162,12 @@ diversity_plots_simpsons <- ddply(species_plots, ~id,function(x) {data.frame(sim
 
 
 diversity_sites_simpsons <- ddply(species_sites, ~site_id,function(x) {data.frame(simpson = diversity(x[-1], index = "simpson"))
+  })
+
+diversity_sites_nor_simpsons <- ddply(species_sites_nor, ~site_id,function(x) {data.frame(simpson = diversity(x[-1], index = "simpson"))
+  })
+
+diversity_sites_ref_simpsons <- ddply(species_sites_ref, ~site_id,function(x) {data.frame(simpson = diversity(x[-1], index = "simpson"))
   })
 
 
@@ -137,22 +191,40 @@ data_species_wide3_sites <- data_species_wide2_sites %>%
   left_join(sr_sites_margalef) %>%
   as.data.frame()
 
+data_species_wide3_sites_nor <- species_sites_nor %>% 
+  left_join(diversity_sites_nor_shannon) %>% 
+  left_join(diversity_sites_nor_simpsons) %>% 
+  left_join(sr_sites_nor_menhinick) %>%
+  left_join(sr_sites_nor_margalef) %>%
+  as.data.frame()
+
+data_species_wide3_sites_ref <- species_sites_ref %>% 
+  left_join(diversity_sites_ref_shannon) %>% 
+  left_join(diversity_sites_ref_simpsons) %>% 
+  left_join(sr_sites_ref_menhinick) %>%
+  left_join(sr_sites_ref_margalef) %>%
+  as.data.frame()
+
 
 ```
 
 
 ## Save
 ```{r}
-save(data_species_wide2_sites_nor, file = "data_species_wide2_sites_nor_2020_07_15.rda")
-save(data_species_wide2_sites_ref, file = "data_species_wide2_sites_ref_2020_07_15.rda")
-
-
-
 # Includes columns with mean and sd for species cover, species richness measures and species diversity measures (for both normal- and reference plots):
 save(data_species_wide3, file = "data_species_wide3_2020_07_15.rda")
 
+
 # Includes columns with mean and sd for species cover, species richness measures and species diversity measures; grouped by site id (for both normal- and reference plots):
 save(data_species_wide3_sites, file = "data_species_wide3_sites_2020_07_15.rda")
+# Includes columns with mean and sd for species cover; grouped by site id (for normal plots):
+save(data_species_wide2_sites_nor, file = "data_species_wide2_sites_nor_2020_07_15.rda")
+# Includes columns with mean and sd for species cover; grouped by site id (for reference plots):
+save(data_species_wide2_sites_ref, file = "data_species_wide2_sites_ref_2020_07_15.rda")
+# Includes columns with species richness measures and species diversity measures; grouped by site id (for normal plots):
+save(data_species_wide3_sites_nor, file = "data_species_wide3_sites_nor_2020_07_16.rda")
+# Includes columns with species richness measures and species diversity measures; grouped by site id (for reference plots):
+save(data_species_wide3_sites_ref, file = "data_species_wide3_sites_ref_2020_07_16.rda")
 
 ```
 
