@@ -69,8 +69,8 @@ str(data_plots$grain_size_f)
 
 
 #### data set "data_plots2_normal" ----
-data_plots2_normal$plotnumb <- as.factor(data_plots2_normal$plotnum)
-str(data_plots2_normal$plotnum)
+# data_plots2_normal$plotnumb <- as.factor(data_plots2_normal$plotnum)
+# str(data_plots2_normal$plotnum)
 
 ```
 
@@ -84,29 +84,16 @@ levels(data_plots$exposure)
 ```
 
 
-#### Add a column with only year
-```{r}
-library(tidyverse)
-
-data_plots <- data_plots %>%
-  separate(date, into = c("day", "month", "year"), remove = F) # Can also use  sep = "."  to specify the seperator
-
-data_plots$year <- as.numeric(data_plots$year)
-data_plots$month <- as.numeric(data_plots$month)
-data_plots$day <- as.numeric(data_plots$day)
-
-```
-
 
 #### Add a column with site ID and one with plot number
 ```{r}
 library(tidyverse)
 
 data_plots <- data_plots %>%
-  separate(ID, into = c("siteID", "plotnumb"), remove = F) # Can also use  sep = "."  to specify the seperator
+  separate(ID, into = c("site_id", "plot_id"), remove = F) # Can also use  sep = "."  to specify the seperator
 
-data_plots$siteID <- as.factor(data_plots$siteID)
-data_plots$plotnumb <- as.factor(data_plots$plotnumb)
+data_plots$site_id <- as.factor(data_plots$site_id)
+
   
   
 ```
@@ -115,11 +102,13 @@ data_plots$plotnumb <- as.factor(data_plots$plotnumb)
 #### Add a column with reference plot yes or no
 ```{r}
 
-data_plots$plotnumb <- as.numeric(data_plots$plotnumb)
-data_plots$reference <- ifelse(data_plots$plotnumb >= 9, "yes", "no")
+# data_plots$plot_id <- as.numeric(data_plots$plot_id)
+data_plots$reference <- ifelse(data_plots$plot_id >= 9, "yes", "no")
 
 data_plots$reference <- as.factor(data_plots$reference)
+str(data_plots$reference)
 
+data_plots$plot_id <- as.factor(data_plots$plot_id)
 
 ```
 
@@ -130,23 +119,20 @@ data_plots <- data_plots %>%
   rename(
     site_type = site)
 
+data_plots <- data_plots %>% 
+  rename(
+    id = ID)
 
 ```
 
 
 #### Add mean and sd species cover to plots dataset
 ```{r}
-load("processdata/data_plots_2020_04_20.rda")
+species_cover_meansd <- data_species_wide2[, c(1, 194:195)]
 
-data_plots2 <- bind_cols(data_plots, data_species_wide2$m)
-data_plots2 <- data_plots2 %>% 
-  rename(
-    mean_cover = ...44)
-
-data_plots2 <- bind_cols(data_plots2, data_species_wide2$sd)
-data_plots2 <- data_plots2 %>% 
-  rename(
-    sd_cover = ...45)
+data_plots2 <- data_plots %>% 
+  left_join(species_cover_meansd) %>%
+  as.data.frame()
 
 ```
 
@@ -166,6 +152,7 @@ data_plots2[279, ] # true NAs (missing grain size)
 data_plots2[185, ] # true NAs (missing soil dry weight and loi)
 data_plots2[186, ] # true NAs (missing soil dry weight and loi)
 data_plots2[35, ] # true NAs (missing loi)
+data_plots2[198, ] # No species cover mean and sd, so only important for that really
 
 data_plots2 <- na.omit(data_plots2)
 nrow(data_plots2)
@@ -201,16 +188,11 @@ data_plots2_normal <- as.data.frame(data_plots2_normal)
 ```{r}
 data_plots2 <- data_plots2 %>% 
   rename(
-    id = ID)
+    mean_cover = m)
 
 data_plots2 <- data_plots2 %>% 
   rename(
-    site_id = siteID)
-
-data_plots2 <- data_plots2 %>% 
-  rename(
-    plot_id = plotnumb)
-
+    sd_cover = sd)
 
 ```
 
@@ -232,6 +214,18 @@ sum(is.na(data_plots3))
 
 
 
+#### Order factor levels, so that the most used one is first
+```{r}
+
+plot(data_plots3$site_type)
+data_plots3$site_type <- factor(data_plots3$site_type, levels = c("road", "crossing"))
+
+plot(data_plots3$grain_size_stand_f)
+data_plots3$grain_size_stand_f <- factor(data_plots3$grain_size_stand_f, levels = c("6", "1", "2", "3", "5"))
+
+```
+
+
 
 
 
@@ -241,14 +235,22 @@ save(data_plots, file = "data_plots_2020_06_25.rda")
 save(data_plots2, file = "data_plots2_2020_06_29.rda") # Like data_plots, but inluding column with mean cover and sd (species), total_cover_layers
 save(data_plots2_reference, file = "data_plots2_reference_2020_07_16.rda") # Like data_plots2, but only reference plots
 save(data_plots2_normal, file = "data_plots2_normal_2020_07_16.rda") # Like data_plots2, but only normal plots
+
+save(data_plots, file = "data_plots_2020_07_17.rda")
+save(data_plots2, file = "data_plots2_2020_07_17.rda") # Like data_plots, but inluding column with mean cover and sd (species), total_cover_layers
+save(data_plots2_reference, file = "data_plots2_reference_2020_07_17.rda") # Like data_plots2, but only reference plots
+save(data_plots2_normal, file = "data_plots2_normal_2020_07_17.rda") # Like data_plots2, but only normal plots
+
 save(data_plots3, file = "data_plots3_2020_07_16.rda") # Like data_plots2, but species richness and diversity
+save(data_plots3, file = "data_plots3_2020_07_17.rda") # Like data_plots2, but species richness and diversity
 
 
 load("processdata/data_plots_2020_06_25.rda")
-load("processdata/data_plots2_2020_06_29.rda") # Like data_plots, but inluding column with mean cover and sd (species cover)
-load("processdata/data_plots2_reference_2020_06_29.rda") # Like data_plots2, but only reference plots
-load("processdata/data_plots2_normal_2020_06_29.rda") # Like data_plots2, but only normal (non-reference) plots
+load("processdata/data_plots2_2020_07_17.rda") # Like data_plots, but inluding column with mean cover and sd (species cover)
+load("processdata/data_plots2_reference_2020_07_17.rda") # Like data_plots2, but only reference plots
+load("processdata/data_plots2_normal_2020_07_17.rda") # Like data_plots2, but only normal (non-reference) plots
 load("processdata/data_plots3_2020_07_16.rda") # Like data_plots2, but species richness and diversity
+load("processdata/data_plots3_2020_07_17.rda") # Like data_plots2, but species richness and diversity
 
 ```
 
