@@ -34,7 +34,14 @@ load("processdata/data_plots2_2020_06_29.rda") # Like data_plots, but inluding c
 load("processdata/data_plots2_reference_2020_06_29.rda") # Like data_plots2, but only reference plots
 load("processdata/data_plots2_normal_2020_06_29.rda") # Like data_plots2, but only non-reference plots
 load("processdata/data_plots2_normal_2020_07_02.rda") # Like data_plots2_normal, but plotnumb as factor
-                                                                  
+
+load("processdata/data_plots2_2020_07_17.rda") # Like data_plots, but inluding column with mean cover and sd (species cover)
+load("processdata/data_plots2_reference_2020_07_17.rda") # Like data_plots2, but only reference plots
+load("processdata/data_plots2_normal_2020_07_17.rda") # Like data_plots2, but only normal (non-reference) plots
+
+load("processdata/data_plots3_2020_07_16.rda") # Like data_plots2, but species richness and diversity
+load("processdata/data_plots3_2020_07_17.rda") # Like data_plots2, but species richness and diversity
+
 ```
 
 
@@ -60,10 +67,6 @@ load("processdata/data_species_wide_2020_06_26.rda")
 
 
 load("processdata/data_species_wide2_2020_06_26.rda") # Includes mean and sd of species for rows and columns
-
-#### OBS! somehow the plot and site id columns are wrong in this version...
-# load("processdata/data_species_wide2_2020_07_15.rda") # Includes mean and sd of species for rows
-
 
 # Includes columns with mean and sd for species cover, species richness measures and species diversity measures:
 load("processdata/data_species_wide3_2020_07_15.rda")
