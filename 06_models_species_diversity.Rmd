@@ -21,11 +21,19 @@ head(data_plots3)
 ## ----------- Test for data distribution/ screwness ---------
 ```{r}
 library(fitdistrplus)
+## If discrete is TRUE, the represented distributions are the Poisson, negative binomial distributions, and the normal distribution to which previous discrete distributions may converge. If discrete is FALSE, these are uniform, normal, logistic, lognormal, beta and gamma distributions.
 
+# discrete = FALSE
 descdist(data_plots3$shannon, discrete = FALSE, boot = 500) # Normal, maybe lognormal
 descdist(data_plots3$simpson, discrete = FALSE, boot = 500) # beta
 descdist(data_plots3$sr_margalef, discrete = FALSE, boot = 500) # beta, maybe normal
 descdist(data_plots3$sr_menhinick, discrete = FALSE, boot = 500) # lognormal
+
+# discrete = TRUE
+descdist(data_plots3$shannon, discrete = TRUE, boot = 500) # neg. binomial
+descdist(data_plots3$simpson, discrete = TRUE, boot = 500) # neg. binomial
+descdist(data_plots3$sr_margalef, discrete = TRUE, boot = 500) # normal or poisson
+descdist(data_plots3$sr_menhinick, discrete = TRUE, boot = 500) # neg. binomial
 
 ```
 
@@ -260,17 +268,18 @@ plot_model(lm4_reml, type = "eff")
 
 
 
-
-
 ## -------------------- (Generalized) linear mixed model with "simpson" as response (all plots) -------------------
 
 ```{r}
 library(glmmTMB)
 library(betareg)
+library("lmtest")
 
 glm0_rand <- glmmTMB(simpson ~ dist_int_veg + total_cover_layers + field_layer_h + caco + slope + exposure + grain_size_stand_f + loi + method + site_type + (1|site_id), data = data_plots3, family = beta_family(link = "logit")) # Error in eval(family$initialize) : y values must be 0 < y < 1 ---> y is min 0 and max 0.8907328
 
+
 lm0_rand <- lmer(simpson ~ dist_int_veg + total_cover_layers + field_layer_h + caco + slope + exposure + grain_size_stand_f + loi + method + site_type + (1|site_id), data = data_plots3, REML = F)
+
 
 #### random factor selection ----
 lm0_rand <- lmer(sr_menhinick ~ dist_int_veg + total_cover_layers + field_layer_h + caco + slope + exposure + grain_size_stand_f + loi + method + site_type + (1|site_id/plot_id), data = data_plots3, REML = F) # Error: number of levels of each grouping factor must be < number of observations (problems: plotnumb:siteID)
@@ -282,6 +291,13 @@ lm2_rand <- lmer(sr_menhinick ~ dist_int_veg + total_cover_layers + field_layer_
 
 
 #### models ----
+
+glm0_beta <- glmmTMB(simpson ~ dist_int_veg + total_cover_layers + field_layer_h + caco + slope + exposure + grain_size_stand_f + loi + method + site_type + (1|site_id), data = data_plots3, family = nbinom2())
+
+
+
+
+
 lm0 <- lmer(sr_menhinick ~ dist_int_veg + total_cover_layers + field_layer_h + caco + slope + exposure + grain_size_stand_f + loi + method + (1|site_id), data = data_plots3, REML = F)
 
 lm1 <- lmer(sr_menhinick ~ dist_int_veg + total_cover_layers + caco + exposure + grain_size_stand_f + (1|site_id), data = data_plots3, REML = F)
