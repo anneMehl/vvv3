@@ -14,9 +14,10 @@ knitr::opts_chunk$set(echo = TRUE)
 library(vegan)
 library(MASS)
 
-head(data_species_wide2_normal)
+head(data_species_wide3)
+head(data_species_wide3_sites)
 
-species_nmds <- data.frame(data_species_wide2_normal[, c(4:192)])
+species_nmds <- data.frame(data_species_wide3_sites[, c(2:190)])
 str(species_nmds)
 species_nmds[, 1:189] <- sapply(species_nmds[, 1:189], as.integer)
 
@@ -35,7 +36,7 @@ ordiplot(vare.mds0, type = "t")
 ```
 
 ```{r}
-vare.mds <- metaMDS(species_nmds, trace = FALSE, distance = "morisita")
+vare.mds <- metaMDS(species_nmds, trace = FALSE, distance = "chao")
 vare.mds
 
 plot(vare.mds, type = "t", display = "sites")
