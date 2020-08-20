@@ -1,0 +1,195 @@
+---
+title: "Ordinasjon"
+author: "Jørn Olav Løkken"
+date: "22 juni 2018"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r standard, include=FALSE}
+# Libraries and import
+library(vegan)
+
+
+species<- read.csv2("./data/species.csv", sep=";")
+env.var<- read.csv2("./data/envvar3.csv", sep=";")
+
+```
+
+## DCA
+
+Kjører DCA på hele datamaterialet. Kjapt plott for å se etter artifakter (feks tongue effect eller andre mønster i data som kommer av analysen).
+```{r DCA, message=FALSE, warning=FALSE, include=FALSE}
+dca.tot<-decorana(species)
+# Ekstraherer aksene:
+dca1<-scores(dca.tot,display="sites",origin=FALSE)[,1]
+dca2<-scores(dca.tot,display="sites",origin=FALSE)[,2]
+
+```
+
+## GNMDS
+
+Running the GNMDS (more or less just script from Rune Halvorsen)
+
+```{r GNMDS, message=FALSE, warning=FALSE, include=FALSE}
+# making Bray-Curtis dissimilarity matrix:
+
+dist.y<-vegdist(species,method="bray") 
+
+# Replacing unreliable distances (B-C > 0.8 by geodesic distances,
+# using stepacross; note that the optimal value for epsilon may be dataset-specific
+
+geodist.y<-isomapdist(dist.y, epsilon=0.8)
+
+k=2 # k determines the number of dimensions in the ordination
+# define a general, empty object called mds:
+mds<-NULL
+# making 100 "mds"s from initial starting configurations, allocating them into the mds object:
+for(i in 1:100)
+{mds[[i]]<-monoMDS(geodist.y, matrix(c(runif(dim(species)[1]*k)),nrow=dim(species)[1]), 
+  k=2, model = "global", maxit=200, smin = 1e-7, sfgrmin = 1e-7)}
+
+# alternative options: model = "local", "linear" or "hybrid" with threshold = [value]
+
+# the mds object is now a list consisting of 100 "subobjects" being lists
+# extracting the stress values as a vector - 
+# stress is given as the 22th element in each "subobject list"
+mds.stress<-unlist(lapply(mds,function(v){v[[22]]})) 
+
+# looking at the stress values for 100 mds:
+# mds.stress
+# ordering the stress values for the 100 mds:
+# order(mds.stress)
+# Saving the order in a vector
+ordered<-order(mds.stress)
+# ordered
+
+# find the stress of the solutions with the lowest and second lowest stress:
+mds.stress[ordered[1]]
+mds.stress[ordered[2]]
+
+#scaling of axes to half change units and varimax rotation by postMDS
+mds.best<-postMDS(mds[[ordered[1]]],geodist.y, pc = TRUE, halfchange = TRUE, threshold = 0.8)
+#mds.best
+mds.secbest<-postMDS(mds[[ordered[2]]],geodist.y, pc = TRUE, halfchange = TRUE, threshold = 0.8)
+#mds.secbest
+
+
+#making variables from GNMDS axes 1 and 2 for plotting
+gnmds1<-mds.best$points[,1]
+gnmds2<-mds.best$points[,2]
+
+
+```
+
+## Procrustes error
+
+Tester procrustes error.
+
+```{r procrustes, echo=FALSE, message=FALSE, warning=FALSE}
+#Procrustes comparisons
+procrustes(mds.best,mds.secbest,permutations=999)
+protest(mds.best,mds.secbest,permutations=999)
+
+plot(procrustes(mds.best,mds.secbest,permutations=999))
+stressplot(mds.best)
+```
+
+## DCA vs GNMDS
+
+Gir metodene ganske like plot?
+
+```{r test DCA vs GNMDS, echo=FALSE, message=FALSE, warning=FALSE}
+cor.test(dca1,gnmds1,method="k")
+cor.test(dca2,gnmds2,method="k")
+```
+
+## GNMDS - helt enkelt plot med miljøvariablene, mix og triks med de utvalg du vil ha i data.
+
+```{r GNMDS plot, echo=FALSE, message=FALSE, warning=FALSE}
+
+# Bare punktene:
+plot(gnmds1,gnmds2,xlab="gnmds1 (scaling in H.C. units)",ylab="gnmds2 (scaling in H.C. units)",type="n", ylim=c(-1.2,1.2), xlim=c(-1.2,1.2))
+    lines(c(-2.5,2.5),c(0,0),lty=2,col=8, lwd=2)
+    lines(c(0,0),c(-2.5,2.5),lty=2,col=8, lwd=2)
+    points(gnmds1[env.var$year=="1994"],gnmds2[env.var$year=="1994"],pch=3,col="cyan3", cex=0.4)
+    points(gnmds1[env.var$year=="2016"],gnmds2[env.var$year=="2016"],pch=2,col="darkorange", cex=0.4)
+
+# Legger på vektorer for environmental variables
+    mds.z<-envfit(scores(mds.best,choices=1:2,origin=TRUE),env.var,999)
+    plot(mds.z,arrow.mul=1.6,col=1,add=T, cex=1.0)
+
+
+
+
+```
+
+
+Noen ting det kan være verdt å "Leke med" for å skjønne strukturen i dataene (Denne chunken kjører ikke alene. Du må klikke å lime linjene inn i et plot):
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+
+ordisurf(mds.best,env.var$altitude,display="sites",col=1,add=T)
+
+# En linje pr level på environmental variabel du vil ha med for disse to:
+
+ordiellipse(mds.best,env.var$year,display="sites",col=4,lty=1,lwd=2,show.groups = "1994",add=T) 
+ordihull(mds.best,env.var$year,display="sites",col=4,lty=1,lwd=2,show.groups = "1994",add=T)
+
+```
+
+
+I tilfelle du vil ha med piler som viser retningen behandlingene beveger seg over tid (Dersom du har flere tidspunkt må du lage en line pr "leg" og gjerne et point for hvert årstall og avslutte med en arrow):
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+plot(gnmds1,gnmds2,xlab="gnmds1 (scaling in H.C. units)",ylab="gnmds2 (scaling in H.C. units)",type="n", ylim=c(-1.2,1.2), xlim=c(-1.2,1.2))
+
+
+lines(c(-2,2),c(0,0),lty=2,col=8)
+lines(c(0,0),c(-2,2),lty=2,col=8)
+
+
+  arrows(x0=mean(gnmds1[env.var$Alt.group=="Alpine" & env.var$year=="1994"]), y0=mean(gnmds2[env.var$Alt.group=="Alpine" & env.var$year=="1994"]), x1=mean(gnmds1[env.var$Alt.group=="Alpine" & env.var$year=="2016"]), y1=mean(gnmds2[env.var$Alt.group=="Alpine" & env.var$year=="2016"]),length = 0.07, angle = 35,code = 2,col=4,lwd=2, lty=1)
+
+  arrows(x0=mean(gnmds1[env.var$Alt.group=="TL+100" & env.var$year=="1994"]), y0=mean(gnmds2[env.var$Alt.group=="TL+100" & env.var$year=="1994"]), x1=mean(gnmds1[env.var$Alt.group=="TL+100" & env.var$year=="2016"]), y1=mean(gnmds2[env.var$Alt.group=="TL+100" & env.var$year=="2016"]),length = 0.07, angle = 35,code = 2,col="purple",lwd=2, lty=1)
+
+  arrows(x0=mean(gnmds1[env.var$Alt.group=="TL-100" & env.var$year=="1994"]), y0=mean(gnmds2[env.var$Alt.group=="TL-100" & env.var$year=="1994"]), x1=mean(gnmds1[env.var$Alt.group=="TL-100" & env.var$year=="2016"]), y1=mean(gnmds2[env.var$Alt.group=="TL-100" & env.var$year=="2016"]),length = 0.07, angle = 35,code = 2,col=2,lwd=2, lty=1)
+
+  arrows(x0=mean(gnmds1[env.var$Alt.group=="Forest" & env.var$year=="1994"]), y0=mean(gnmds2[env.var$Alt.group=="Forest" & env.var$year=="1994"]), x1=mean(gnmds1[env.var$Alt.group=="Forest" & env.var$year=="2016"]), y1=mean(gnmds2[env.var$Alt.group=="Forest" & env.var$year=="2016"]),length = 0.07, angle = 35,code = 2,col=3,lwd=2, lty=1)
+
+# eksempel på point:
+  
+points(mean(gnmds1[env.var$Alt.group=="TL+100" & env.var$year=="2016"]),mean(gnmds2[env.var$Alt.group=="TL+100" & env.var$year=="2016"]),pch=4,col=1, cex=1)
+
+```
+
+Legge til artsnavn i plottet:
+
+```{r}
+species.scores1 <- wascores(mds.best$points[,1], species) #ekstraherer species scores
+species.scores2 <- wascores(mds.best$points[,2], species)
+
+#lager ny dataframe for navn i tilfelle det er noe som skal flikkes på av tekst.
+species.scores1.r <- species.scores1
+species.scores2.r <- species.scores2
+
+#Kan lønne seg å gjøre et utvalg, ellers blir det veldig tett med navn.
+
+idx <- (colSums(species))>10000
+
+
+plot(gnmds1,gnmds2,xlab="gnmds1 (scaling in H.C. units)",ylab="gnmds2 (scaling in H.C. units)",type="n", ylim=c(-1.0,1.0), xlim=c(-.5,.5))
+
+points(species.scores1[idx],species.scores2[idx],pch=20)
+
+text(species.scores1.r[idx],species.scores2.r[idx], labels=row.names(species.scores2.r)[idx]) 
+
+```
+
+

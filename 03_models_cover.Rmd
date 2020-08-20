@@ -94,7 +94,7 @@ lm9 <- lmer(total_cover_layers ~  method + (1|site_id), data = data_plots2_norma
 lm10 <- lmer(total_cover_layers ~ method*dist_int_veg + (1|site_id), data = data_plots2_normal, REML = F) #2
 lm11 <- lmer(total_cover_layers ~ method*dist_int_veg + caco + (1|site_id), data = data_plots2_normal, REML = F)
 lm12 <- lmer(total_cover_layers ~ method*caco + (1|site_id), data = data_plots2_normal, REML = F) #1
-lm12a <- lmer(total_cover_layers ~ method*caco + dist_int_veg + (1|site_id), data = data_plots2_normal, REML = F)
+lm12a_total_c <- lmer(total_cover_layers ~ method*caco + dist_int_veg + (1|site_id), data = data_plots2_normal, REML = F)
 lm13 <- lmer(total_cover_layers ~ method*caco + loi + (1|site_id), data = data_plots2_normal, REML = F) #3
 lm14 <- lmer(total_cover_layers ~ method*caco + grain_size_stand_f + (1|site_id), data = data_plots2_normal, REML = F)
 lm15 <- lmer(total_cover_layers ~ method*loi + (1|site_id), data = data_plots2_normal, REML = F)
@@ -211,7 +211,7 @@ lm20 <- lmer(m ~ method + loi + (1|site_id), data = data_plots2_normal, REML = F
 
 lm21 <- lmer(m ~ method*loi + (1|site_id), data = data_plots2_normal, REML = F) #2
 lm22 <- lmer(m ~ method*grain_size_stand_f + (1|site_id), data = data_plots2_normal, REML = F)
-lm23 <- lmer(m ~ method*log(loi+1) + (1|site_id), data = data_plots2_normal, REML = F) #1
+lm23_mean_c <- lmer(m ~ method*log(loi+1) + (1|site_id), data = data_plots2_normal, REML = F) #1
 lm24 <- lmer(m ~ method*log(loi+1) + log(dist_int_veg+1) + (1|site_id), data = data_plots2_normal, REML = F) #3
 
 lm25 <- lmer(log(m+1) ~ method*log(loi+1) + (1|site_id), data = data_plots2_normal, REML = F)
@@ -297,7 +297,7 @@ plot_model(lm25_REML, type = "eff")
 
 
 
-
+########################## Not done yet!!!
 
 ## -------------------- Model with "field_layer_c" as response (all plots) -------------------
 

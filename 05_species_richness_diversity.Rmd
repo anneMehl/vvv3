@@ -211,7 +211,7 @@ data_species_wide3_sites_ref <- species_sites_ref %>%
 
 ## Save
 ```{r}
-# Includes columns with mean and sd for species cover, species richness measures and species diversity measures (for both normal- and reference plots):
+# Includes columns with mean and sd for species cover, species richness measures and species diversity measures (for both restored- and reference plots):
 save(data_species_wide3, file = "data_species_wide3_2020_07_15.rda")
 
 

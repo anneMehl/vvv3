@@ -432,7 +432,7 @@ data_species_wide3_sites_reference <- as.data.frame(data_species_wide3_sites_ref
 ```
 
 
-#### Subset all normal (non-reference) plots
+#### Subset all restored plots
 ```{r}
 #### Use latest dataframe here ----
 data_species_wide3_normal <- filter(data_species_wide3, reference == "no")
@@ -478,7 +478,16 @@ head(data_species_wide)
 
 
 
+## Bring plot and species datasets to same length
+```{r}
+library(dplyr)
 
+data_full <- inner_join(data_plots4, data_species_wide4, by = "id")
+
+save(data_full, file = "data_full_2020_08_19.rda")
+
+
+```
 
 
 

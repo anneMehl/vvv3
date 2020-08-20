@@ -14,14 +14,58 @@ knitr::opts_chunk$set(echo = TRUE)
 library(vegan)
 library(MASS)
 
-head(data_species_wide3)
+head(data_species_wide4)
 head(data_species_wide3_sites)
 
-species_nmds <- data.frame(data_species_wide3_sites[, c(2:190)])
+species_nmds <- data.frame(data_species_wide4[, c(6:194)])
 str(species_nmds)
 species_nmds[, 1:189] <- sapply(species_nmds[, 1:189], as.integer)
 
 species_nmds <- as.matrix(species_nmds)
+
+sum(colSums(species_nmds) == 0) #ingen tomme kolonner, alle arter er til stede
+sum(rowSums(species_nmds) == 0)
+
+sum(colSums(species_nmds) < 5) # 52
+sum(colSums(species_nmds) < 3) # 38
+which(colSums(species_nmds) < 3) 
+#              callitriche_sp              holcus_lanatus  chamerion_cf_angustifolium         plantago_lanceolata 
+       #                   36                          41                          46                          49 
+       # juncus_cf_filiformis            luzula_cf_pilosa        anthyllis_vulneraria                geum_urbanum 
+       #                   52                          56                          58                          68 
+       #         cerastium_sp             carex_canescens    scutellaria_galericulata              carex_cf_nigra 
+       #                   76                          82                          89                          92 
+       #        erigeron_acer                   betula_sp                 carex_nigra               melampyrum_sp 
+       #                  102                         106                         109                         110 
+       #   dryopteris_expansa hieracium_seksjon_hieracium               ranunculus_sp         polygonum_viviparum 
+       #                  117                         121                         135                         138 
+       # matricaria_discoidea          stellaria_graminea               melica_nutans             mycelis_muralis 
+       #                  142                         147                         152                         153 
+       #  lysimachia_vulgaris        convolvulus_arvensis             crepis_tectorum           myosotis_arvensis 
+       #                  156                         168                         170                         174 
+       #     lapsana_communis                 glyceria_sp        cerastium_cf_arvense                   galium_sp 
+       #                  175                         177                         178                         180 
+       #      salix_pentandra             galium_trifidum          galium_cf_trifidum           trisetum_pratense 
+       #                  181                         182                         183                         184 
+       #   agrostis_canescens              lolium_perenne 
+       #                  185                         189 
+
+sum(colSums(species_nmds) < 2) # 26
+which(colSums(species_nmds) < 2) 
+       #       callitriche_sp  chamerion_cf_angustifolium         plantago_lanceolata        anthyllis_vulneraria 
+       #                   36                          46                          49                          58 
+       #         geum_urbanum             carex_canescens    scutellaria_galericulata              carex_cf_nigra 
+       #                   68                          82                          89                          92 
+       #        erigeron_acer                 carex_nigra hieracium_seksjon_hieracium               ranunculus_sp 
+       #                  102                         109                         121                         135 
+       # matricaria_discoidea          stellaria_graminea         lysimachia_vulgaris        convolvulus_arvensis 
+       #                  142                         147                         156                         168 
+       #      crepis_tectorum           myosotis_arvensis                 glyceria_sp        cerastium_cf_arvense 
+       #                  170                         174                         177                         178 
+       #            galium_sp             salix_pentandra             galium_trifidum          galium_cf_trifidum 
+       #                  180                         181                         182                         183 
+       #   agrostis_canescens              lolium_perenne 
+       #                  185                         189 
 
 ```
 
@@ -36,7 +80,7 @@ ordiplot(vare.mds0, type = "t")
 ```
 
 ```{r}
-vare.mds <- metaMDS(species_nmds, trace = FALSE, distance = "chao")
+vare.mds <- metaMDS(species_nmds, trace = FALSE, distance = "bray")
 vare.mds
 
 plot(vare.mds, type = "t", display = "sites")

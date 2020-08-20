@@ -21,6 +21,7 @@ head(data_plots3)
 ## ----------- Test for data distribution/ screwness ---------
 ```{r}
 library(fitdistrplus)
+
 ## If discrete is TRUE, the represented distributions are the Poisson, negative binomial distributions, and the normal distribution to which previous discrete distributions may converge. If discrete is FALSE, these are uniform, normal, logistic, lognormal, beta and gamma distributions.
 
 # discrete = FALSE
@@ -76,7 +77,7 @@ lm0 <- lmer(shannon ~ dist_int_veg + total_cover_layers + field_layer_h + caco +
 lm1 <- lmer(shannon ~ dist_int_veg + total_cover_layers  + caco + exposure + grain_size_stand_f + (1|site_id), data = data_plots3, REML = F)
 lm2 <- lmer(shannon ~ dist_int_veg + total_cover_layers  + caco + grain_size_stand_f + (1|site_id), data = data_plots3, REML = F) 
 lm3 <- lmer(shannon ~ dist_int_veg + total_cover_layers  + caco + exposure + (1|site_id), data = data_plots3, REML = F)
-lm4 <- lmer(shannon ~ log(dist_int_veg+1) + total_cover_layers  + caco + grain_size_stand_f + (1|site_id), data = data_plots3, REML = F) #1
+lm4_shannon <- lmer(shannon ~ log(dist_int_veg+1) + total_cover_layers  + caco + grain_size_stand_f + (1|site_id), data = data_plots3, REML = F) #1
 lm5 <- lmer(shannon ~ log(dist_int_veg+1) + total_cover_layers  + caco + grain_size_stand_f + log(loi+1) + (1|site_id), data = data_plots3, REML = F) #2
 
 lm4_reml <- lmer(shannon ~ log(dist_int_veg+1) + total_cover_layers  + caco + grain_size_stand_f + (1|site_id), data = data_plots3, REML = T) #1
@@ -146,8 +147,8 @@ plot_model(lm4_reml, type = "diag")
 
 #### Plot results
 ```{r}
-plot_model(lm4_reml, type = "est", show.intercept = T)
-plot_model(lm4_reml, type = "eff")
+plot_model(lm4, type = "est", show.intercept = T)
+plot_model(lm4, type = "eff")
 
 
 ```
@@ -179,7 +180,7 @@ lm0 <- lmer(sr_menhinick ~ dist_int_veg + total_cover_layers + field_layer_h + c
 lm1 <- lmer(sr_menhinick ~ dist_int_veg + total_cover_layers + caco + exposure + grain_size_stand_f + (1|site_id), data = data_plots3, REML = F)
 lm2 <- lmer(sr_menhinick ~ dist_int_veg + total_cover_layers + caco + grain_size_stand_f + (1|site_id), data = data_plots3, REML = F) 
 lm3 <- lmer(sr_menhinick ~ dist_int_veg + total_cover_layers + caco + grain_size_stand_f + log(loi+1) + (1|site_id), data = data_plots3, REML = F)
-lm4 <- lmer(sr_menhinick ~ log(dist_int_veg+1) + total_cover_layers + caco + grain_size_stand_f + log(loi+1) + (1|site_id), data = data_plots3, REML = F) #1
+lm4_sr_menhinick <- lmer(sr_menhinick ~ log(dist_int_veg+1) + total_cover_layers + caco + grain_size_stand_f + log(loi+1) + (1|site_id), data = data_plots3, REML = F) #1
 lm5 <- lmer(sr_menhinick ~ log(dist_int_veg+1) + total_cover_layers + caco + grain_size_stand_f + log(loi+1) + method + (1|site_id), data = data_plots3, REML = F) #3
 lm6 <- lmer(sr_menhinick ~ log(dist_int_veg+1) + total_cover_layers + grain_size_stand_f + log(loi+1) + (1|site_id), data = data_plots3, REML = F) #2
 
@@ -266,7 +267,7 @@ plot_model(lm4_reml, type = "eff")
 
 
 
-
+###################### Not done yet!!!!!!!!
 
 ## -------------------- (Generalized) linear mixed model with "simpson" as response (all plots) -------------------
 

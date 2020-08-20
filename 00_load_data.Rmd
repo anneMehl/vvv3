@@ -27,6 +27,15 @@ library(readr)
 # data_plots <- as.data.frame(data_plots)
 head(data_plots)
 # save(data_plots, file = "data_plots_2020_04_20.rda")
+# write.csv(data_plots3,'data_plots3_2020_07_17.csv')
+
+# data_plots4 <- read_delim("processdata/data_plots4_2020_08_18.csv",
+#                          ";", escape_double = FALSE, col_types = cols(id = col_character(), date = col_character()), na = "NA",
+#                          trim_ws = TRUE)
+# data_plots4 <- as.data.frame(data_plots4)
+# save(data_plots4, file = "data_plots4_2020_08_18.rda")
+
+
 
 load("processdata/data_plots_2020_04_20.rda")
 load("processdata/data_plots_2020_06_25.rda")
@@ -41,6 +50,9 @@ load("processdata/data_plots2_normal_2020_07_17.rda") # Like data_plots2, but on
 
 load("processdata/data_plots3_2020_07_16.rda") # Like data_plots2, but species richness and diversity
 load("processdata/data_plots3_2020_07_17.rda") # Like data_plots2, but species richness and diversity
+
+load("processdata/data_plots4_2020_08_18.rda") # Like data_plots3, with restoration year and new site and plot columns
+load("processdata/data_full_2020_08_19.rda")
 
 ```
 
@@ -58,6 +70,16 @@ library(readr)
 # data_species <- as.data.frame(data_species)
 # head(data_species)
 # save(data_species, file = "data_species_2020_06_25.rda")
+# write.csv(data_species_wide3_sites,'data_species_wide3_sites.csv')
+# write.csv(data_species_wide3,'data_species_wide3.csv')
+
+# data_species_wide4 <- read_delim("processdata/data_species4_2020_08_18.csv",
+#                            ";", escape_double = FALSE, col_types = cols(id = col_character()), na = "NA", trim_ws = TRUE)
+# data_species_wide4 <- as.data.frame(data_species_wide4)
+# save(data_species_wide4, file = "data_species4_2020_08_18.rda")
+
+
+
 
 load("processdata/data_species_2020_04_20.rda")
 
@@ -72,6 +94,9 @@ load("processdata/data_species_wide2_2020_06_26.rda") # Includes mean and sd of 
 load("processdata/data_species_wide3_2020_07_15.rda")
 # Includes columns with mean and sd for species cover, species richness measures and species diversity measures; grouped by site id:
 load("processdata/data_species_wide3_sites_2020_07_15.rda")
+
+# like data_species_wide3, with new site and plot columns:
+load("processdata/data_species4_2020_08_18.rda")
 
 head(data_species_wide)
 
