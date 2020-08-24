@@ -476,9 +476,9 @@ head(data_species_wide)
 
 
 
+## ---------------------- Full data ---------------------------
 
-
-## Bring plot and species datasets to same length
+#### Bring plot and species datasets to same length
 ```{r}
 library(dplyr)
 
@@ -489,7 +489,21 @@ save(data_full, file = "data_full_2020_08_19.rda")
 
 ```
 
+#### Make new colomn for region
+```{r}
+data_full$region <- ifelse(data_full$site_id_new.x < 11, "N", NA)
+data_full$region <- ifelse(data_full$site_id_new.x == 11, "N", data_full$region)
+data_full$region <- ifelse(data_full$site_id_new.x == 12, "E", data_full$region)
+data_full$region <- ifelse(data_full$site_id_new.x == 13, "E", data_full$region)
+data_full$region <- ifelse(data_full$site_id_new.x == 14, "N", data_full$region)
+data_full$region <- ifelse(data_full$site_id_new.x > 14, "W", data_full$region)
 
+data_full$region <- as.factor(data_full$region)
+levels(data_full$region)
+
+save(data_full, file = "data_full_2020_08_24.rda")
+
+```
 
 
 
