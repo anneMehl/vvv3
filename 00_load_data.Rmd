@@ -53,6 +53,7 @@ load("processdata/data_plots3_2020_07_17.rda") # Like data_plots2, but species r
 
 load("processdata/data_plots4_2020_08_18.rda") # Like data_plots3, with restoration year and new site and plot columns
 load("processdata/data_full_2020_08_19.rda")
+load("processdata/data_full_2020_08_24.rda") # including region
 
 ```
 
