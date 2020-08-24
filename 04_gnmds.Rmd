@@ -33,14 +33,16 @@ sum(colSums(species) == 0)
 which(colSums(species) == 0)
 species <- species[, -c(123)]
 
-env.var <- data_full[, c(6:43)]
+env.var <- data_full[, c(6:43, 252)]
 str(env.var)
-env.var <- env.var[, c(1:3, 8, 26, 29:30, 35:36)]
+env.var <- env.var[, c(1:3, 8, 26, 29:30, 35:36, 39)]
 env.var$site_type <- as.factor(env.var$site_type)
 env.var$method <- as.factor(env.var$method)
 env.var$exposure <- as.factor(env.var$exposure)
 env.var$year <- as.factor(env.var$year)
 env.var$grain_size_stand_f <- as.factor(env.var$grain_size_stand_f)
+
+env.var_sub10 <- env.var[-c(23, 181, 182, 241), ]
 
 # env.var_factor <- env.var[, c(1:3, 7, 9)]
 # env.var_cont <- env.var[, c(4:6, 8)]
@@ -59,8 +61,12 @@ species_sub10 <- species[colSums(species) > 10]
 sum(colSums(species_sub10) < 10)
 
 sum(rowSums(species_sub10) < 10) # 4
-species_sub10_1 <- species_sub10[colSums(species_sub10) > 10]
-sum(colSums(species_sub10_1) < 10)
+which(rowSums(species_sub10) < 10)
+species_sub10_1 <- species_sub10[-c(23, 181, 182, 241), ]
+sum(rowSums(species_sub10_1) < 10)
+
+dist[c(201), ]
+rowSums(species_sub10_1[c(204), ])
 
 ```
 
@@ -87,20 +93,20 @@ Running the GNMDS (more or less just script from Rune Halvorsen)
 
 # making Bray-Curtis dissimilarity matrix:
 
-dist.y <- vegdist(species_sub10_1, method = "bray") 
+dist.y <- vegdist(species, method = "bray") 
 
 # Replacing unreliable distances (B-C > 0.8 by geodesic distances,
 # using stepacross; note that the optimal value for epsilon may be dataset-specific
 
 geodist.y <- isomapdist(dist.y, epsilon = 0.9)
 
-k = 10 # k determines the number of dimensions in the ordination
+k = 2 # k determines the number of dimensions in the ordination
 # define a general, empty object called mds:
 mds <- NULL
 # making 100 "mds"s from initial starting configurations, allocating them into the mds object:
 for(i in 1:100)
-{mds[[i]]<-monoMDS(geodist.y, matrix(c(runif(dim(species_sub10_1)[1]*k)),nrow=dim(species_sub10_1)[1]), 
-  k=10, model = "global", maxit=200, smin = 1e-7, sfgrmin = 1e-7)}
+{mds[[i]]<-monoMDS(dist.y, matrix(c(runif(dim(species)[1]*k)),nrow=dim(species)[1]), 
+  k=2, model = "global", maxit=200, smin = 1e-7, sfgrmin = 1e-7)}
 
 # alternative options: model = "local", "linear" or "hybrid" with threshold = [value]
 
@@ -123,9 +129,9 @@ mds.stress[ordered[1]]
 mds.stress[ordered[2]]
 
 #scaling of axes to half change units and varimax rotation by postMDS
-mds.best <- postMDS(mds[[ordered[1]]], geodist.y, pc = TRUE, halfchange = TRUE, threshold = 0.9)
+mds.best <- postMDS(mds[[ordered[1]]], dist.y, pc = TRUE, halfchange = TRUE, threshold = 0.9)
 #mds.best
-mds.secbest <- postMDS(mds[[ordered[2]]], geodist.y, pc = TRUE, halfchange = TRUE, threshold = 0.9)
+mds.secbest <- postMDS(mds[[ordered[2]]], dist.y, pc = TRUE, halfchange = TRUE, threshold = 0.9)
 #mds.secbest
 
 
@@ -164,25 +170,27 @@ NMDS.scree(dist)
 
 nmds1 <- metaMDS(dist, k = 10, trymax = 100, trace = F)
 nmds1
+plot(nmds1)
 stressplot(nmds1)
 
-nmds3 <- metaMDS(species_sub5, k = 10, trymax = 100, trace = F, autotransform = FALSE, distance="bray")
-plot(nmds3)
-plot(nmds3, display = "sites", type = "n")
-points(nmds3, display = "sites", col = "red", cex = 1.25)
-text(nmds3, display ="species")
+plot(nmds1, type = "t", display = "sites")
+
+nmds2 <- metaMDS(species_sub10_1, k = 7, trymax = 100, trace = F, autotransform = FALSE, distance="bray")
+plot(nmds2)
+plot(nmds2, display = "sites", type = "n", ylim =  c(-3, 3), xlim = c(-3, 3))
+points(nmds2, display = "sites", col = "red", cex = 1.25)
+text(nmds2, display ="species")
 
 
 # The function envfit will add the environmental variables as vectors to the ordination plot
-ef <- envfit(nmds3, env.var, permu = 999)
+ef <- envfit(nmds1, env.var_sub10, permu = 999)
 ef
 
 # The two last columns are of interest: the squared correlation coefficient and the associated p-value
 # Plot the vectors of the significant correlations and interpret the plot
-plot(nmds3, type = "t", display = "sites")
+plot(nmds1, type = "t", display = "sites")
 plot(ef, p.max = 0.05)
-# with(ef, ordihull(nmds3, ef$method,
-#                               scaling = "symmetric", label = TRUE)) # Not working yet
+# with(ef, ordihull(nmds1, ef$method, label = TRUE)) # Not working yet
 ```
 
 ## Procrustes error
@@ -218,7 +226,7 @@ cor.test(dca2, gnmds2, method="k")
 
 # Bare punktene:
 plot(gnmds1, gnmds2, xlab = "gnmds1 (scaling in H.C. units)", ylab = "gnmds2 (scaling in H.C. units)", type = "n", 
-     ylim =  c(-1.5, 1.5), xlim = c(-1.5, 1.5))
+     ylim =  c(-3, 3), xlim = c(-3, 3))
 
   lines(c(-3, 3), c(0, 0), lty = 2, col = 8, lwd = 2)
   lines(c(0, 0), c(-3, 3), lty = 2, col = 8, lwd = 2)
@@ -230,14 +238,16 @@ plot(gnmds1, gnmds2, xlab = "gnmds1 (scaling in H.C. units)", ylab = "gnmds2 (sc
   points(gnmds1[env.var$method == "pn"], gnmds2[env.var$method == "pn"], pch = 4, col = "magenta", cex = 0.7)
 
 # Legger på vektorer for environmental variables
-  mds.z <- envfit(scores(mds.best, choices = 1:2, origin = TRUE), env.var, 999)
-  plot(mds.z, col = 1,  cex = 0.7)
+  mds.z <- envfit(scores(mds.best, choices = 1:2, origin = TRUE), env.var_sub10, 999)
+  plot(mds.z, col = 1,  cex = 0.7, p.max = 0.05)
   plot(mds.z, arrow.mul = 1.6, col = 1, add = T, cex = 0.7)
     
   # env.plants <- envfit(gnmds.full ~ log2(Stone.gravel+1)+log2(Busk+1)+log2(invasive.abu+1)+log2(Areal)+log2(Konn), permutations=999, data=envir.full)
   # env.plants
   # fit <- envfit(gnmds.full, env.var, perm = 999)
   # plot(fit, p.max = 0.05, col = "red")
+
+  
 
 
 ```
@@ -258,12 +268,30 @@ ordiellipse(mds.best, env.var$year, display="sites", col=10, lty=1, lwd=2, show.
 ordiellipse(mds.best, env.var$year, display="sites", col=11, lty=1, lwd=2, show.groups = "2014")
 ordiellipse(mds.best, env.var$year, display="sites", col=12, lty=1, lwd=2, show.groups = "2016")
 
-ordiellipse(mds.best, env.var$method, display="sites", col=3, lty=1, lwd=2, show.groups = "nat")
+ordiellipse(mds.best, env.var_sub10$method, display="sites", col=3, lty=1, lwd=2, show.groups = "nat")
+ordiellipse(mds.best, env.var_sub10$method, display="sites", col=2, lty=1, lwd=2, show.groups = "pn")
+ordiellipse(mds.best, env.var_sub10$method, display="sites", col=4, lty=1, lwd=2, show.groups = "seed")
+ordiellipse(mds.best, env.var_sub10$method, display="sites", col=5, lty=1, lwd=2, show.groups = "ref")
+
+ordiellipse(mds.best, env.var_sub10$region, display="sites", col="red", lty=1, lwd=2, show.groups = "N")
+ordiellipse(mds.best, env.var_sub10$region, display="sites", col="green", lty=1, lwd=2, show.groups = "E")
+ordiellipse(mds.best, env.var_sub10$region, display="sites", col="blue", lty=1, lwd=2, show.groups = "W")
+
+ordiellipse(mds.best, env.var_sub10$grain_size_stand_f, display="sites", col=3, lty=1, lwd=2, show.groups = "1")
+ordiellipse(mds.best, env.var_sub10$grain_size_stand_f, display="sites", col=7, lty=1, lwd=2, show.groups = "2")
+ordiellipse(mds.best, env.var_sub10$grain_size_stand_f, display="sites", col=4, lty=1, lwd=2, show.groups = "3")
+ordiellipse(mds.best, env.var_sub10$grain_size_stand_f, display="sites", col=5, lty=1, lwd=2, show.groups = "5")
+ordiellipse(mds.best, env.var_sub10$grain_size_stand_f, display="sites", col=6, lty=1, lwd=2, show.groups = "6")
+
 
 ordihull(mds.best, env.var$method, display="sites", col=3, lty=1, lwd=2, show.groups = "nat")
 ordihull(mds.best, env.var$method, display="sites", col=2, lty=1, lwd=2, show.groups = "pn")
 ordihull(mds.best, env.var$method, display="sites", col=4, lty=1, lwd=2, show.groups = "seed")
 ordihull(mds.best, env.var$method, display="sites", col=5, lty=1, lwd=2, show.groups = "ref")
+
+ordihull(mds.best, env.var_sub10$region, display="sites", col="red", lty=1, lwd=2, show.groups = "N")
+ordihull(mds.best, env.var_sub10$region, display="sites", col="green", lty=1, lwd=2, show.groups = "E")
+ordihull(mds.best, env.var_sub10$region, display="sites", col="blue", lty=1, lwd=2, show.groups = "W")
 
 ```
 
