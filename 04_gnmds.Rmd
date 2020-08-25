@@ -62,11 +62,11 @@ sum(colSums(species_sub10) < 10)
 
 sum(rowSums(species_sub10) < 10) # 4
 which(rowSums(species_sub10) < 10)
+species_sub10_1 <- species_sub10[rowSums(species_sub10) > 10]
 species_sub10_1 <- species_sub10[-c(23, 181, 182, 241), ]
 sum(rowSums(species_sub10_1) < 10)
 
-dist[c(201), ]
-rowSums(species_sub10_1[c(204), ])
+
 
 ```
 
@@ -88,56 +88,58 @@ Running the GNMDS (more or less just script from Rune Halvorsen)
 
 ```{r GNMDS, message=FALSE, warning=FALSE, include=FALSE}
 
-##### Runes variant:
+##### ----- Rune Halvorsens variant: -----
 
 
-# making Bray-Curtis dissimilarity matrix:
+## Making Bray-Curtis dissimilarity matrix:
+dist.y <- vegdist(species_sub10_1, method = "bray") 
 
-dist.y <- vegdist(species, method = "bray") 
-
-# Replacing unreliable distances (B-C > 0.8 by geodesic distances,
-# using stepacross; note that the optimal value for epsilon may be dataset-specific
-
+## Replacing unreliable distances (B-C > 0.8 by geodesic distances, using stepacross; note that the optimal value for epsilon may be dataset-specific
 geodist.y <- isomapdist(dist.y, epsilon = 0.9)
 
-k = 2 # k determines the number of dimensions in the ordination
-# define a general, empty object called mds:
+k = 3 # k determines the number of dimensions in the ordination
+## Define a general, empty object called mds:
 mds <- NULL
-# making 100 "mds"s from initial starting configurations, allocating them into the mds object:
+## Making 100 "mds"s from initial starting configurations, allocating them into the mds object:
 for(i in 1:100)
-{mds[[i]]<-monoMDS(dist.y, matrix(c(runif(dim(species)[1]*k)),nrow=dim(species)[1]), 
-  k=2, model = "global", maxit=200, smin = 1e-7, sfgrmin = 1e-7)}
+{mds[[i]]<-monoMDS(dist.y, matrix(c(runif(dim(species_sub10_1)[1]*k)),nrow=dim(species_sub10_1)[1]), 
+  k=3, model = "global", maxit=200, smin = 1e-7, sfgrmin = 1e-7)}
 
+for(i in 1:100)
+{mds[[i]]<-monoMDS(geodist.y, matrix(c(runif(dim(species_sub10_1)[1]*k)),nrow=dim(species_sub10_1)[1]), 
+  k=3, model = "global", maxit=200, smin = 1e-7, sfgrmin = 1e-7)}
 # alternative options: model = "local", "linear" or "hybrid" with threshold = [value]
 
-# the mds object is now a list consisting of 100 "subobjects" being lists
-# extracting the stress values as a vector - 
-# stress is given as the 22th element in each "subobject list"
+
+## The mds object is now a list consisting of 100 "subobjects" being lists
+## Extracting the stress values as a vector - stress is given as the 22th element in each "subobject list"
 mds.stress <- unlist(lapply(mds, function(v){v[[22]]})) 
 
-# looking at the stress values for 100 mds:
-# mds.stress
-# ordering the stress values for the 100 mds:
+## Ordering the stress values for the 100 mds:
 # order(mds.stress)
-# Saving the order in a vector
+## Saving the order in a vector
 ordered <- order(mds.stress)
-# ordered
 
-# find the stress of the solutions with the lowest and second lowest stress:
 
+## Find the stress of the solutions with the lowest and second lowest stress:
 mds.stress[ordered[1]]
 mds.stress[ordered[2]]
+# mds.stress[ordered[3]]
 
-#scaling of axes to half change units and varimax rotation by postMDS
-mds.best <- postMDS(mds[[ordered[1]]], dist.y, pc = TRUE, halfchange = TRUE, threshold = 0.9)
-#mds.best
-mds.secbest <- postMDS(mds[[ordered[2]]], dist.y, pc = TRUE, halfchange = TRUE, threshold = 0.9)
-#mds.secbest
+## For dist.y scaling of axes to half change units and varimax rotation by postMDS
+# mds.best <- postMDS(mds[[ordered[1]]], dist.y, pc = TRUE, halfchange = TRUE, threshold = 0.9)
+# mds.secbest <- postMDS(mds[[ordered[2]]], dist.y, pc = TRUE, halfchange = TRUE, threshold = 0.9)
 
 
-#making variables from GNMDS axes 1 and 2 for plotting
+## For geodist.yscaling of axes to half change units and varimax rotation by postMDS
+mds.best <- postMDS(mds[[ordered[1]]], geodist.y, pc = TRUE, halfchange = TRUE, threshold = 0.9)
+mds.secbest <- postMDS(mds[[ordered[2]]], geodist.y, pc = TRUE, halfchange = TRUE, threshold = 0.9)
+# mds.thirdbest <- postMDS(mds[[ordered[3]]], geodist.y, pc = TRUE, halfchange = TRUE, threshold = 0.9)
+
+## Making variables from GNMDS axes 1 and 2 for plotting
 gnmds1 <- mds.best$points[, 1]
 gnmds2 <- mds.best$points[, 2]
+# gnmds3 <- mds.best$points[, 3]
 
 
 
@@ -148,49 +150,54 @@ gnmds2 <- mds.best$points[, 2]
 
 
 
-
-##### R-communities variant:
-
-
-# First step is to calculate a distance matrix. See PCOA for more information about the distance measures
-# Here we use bray-curtis distance, which is recommended for abundance data
-dist <- vegdist(species_sub10_1,  method = "bray")
-
-# In this part, we define a function NMDS.scree() that automatically 
-# performs a NMDS for 1-10 dimensions and plots the nr of dimensions vs the stress
-NMDS.scree <- function(x) { #where x is the name of the data frame variable
-  plot(rep(1, 10), replicate(10, metaMDS(x, autotransform = F, k = 1)$stress), xlim = c(1, 10),ylim = c(0, 0.30), xlab = "# of Dimensions", ylab = "Stress", main = "NMDS stress plot")
-  for (i in 1:10) {
-    points(rep(i + 1,10),replicate(10, metaMDS(x, autotransform = F, k = i + 1)$stress))
-  }
-}
-
-# Use the function that we just defined to choose the optimal nr of dimensions
-NMDS.scree(dist)
-
-nmds1 <- metaMDS(dist, k = 10, trymax = 100, trace = F)
-nmds1
-plot(nmds1)
-stressplot(nmds1)
-
-plot(nmds1, type = "t", display = "sites")
-
-nmds2 <- metaMDS(species_sub10_1, k = 7, trymax = 100, trace = F, autotransform = FALSE, distance="bray")
-plot(nmds2)
-plot(nmds2, display = "sites", type = "n", ylim =  c(-3, 3), xlim = c(-3, 3))
-points(nmds2, display = "sites", col = "red", cex = 1.25)
-text(nmds2, display ="species")
-
-
-# The function envfit will add the environmental variables as vectors to the ordination plot
-ef <- envfit(nmds1, env.var_sub10, permu = 999)
-ef
-
-# The two last columns are of interest: the squared correlation coefficient and the associated p-value
-# Plot the vectors of the significant correlations and interpret the plot
-plot(nmds1, type = "t", display = "sites")
-plot(ef, p.max = 0.05)
-# with(ef, ordihull(nmds1, ef$method, label = TRUE)) # Not working yet
+# ##### ----- R-communities variant (this is withour step-across though, which I seem to need)----
+# 
+# 
+# # First step is to calculate a distance matrix. See PCOA for more information about the distance measures
+# # Here we use bray-curtis distance, which is recommended for abundance data
+# dist <- vegdist(species_sub10_1,  method = "bray")
+# 
+# # In this part, we define a function NMDS.scree() that automatically 
+# # performs a NMDS for 1-10 dimensions and plots the nr of dimensions vs the stress
+# NMDS.scree <- function(x) { #where x is the name of the data frame variable
+#   plot(rep(1, 10), replicate(10, metaMDS(x, autotransform = F, k = 1)$stress), xlim = c(1, 10),ylim = c(0, 0.30), xlab = "# of Dimensions", ylab = "Stress", main = "NMDS stress plot")
+#   for (i in 1:10) {
+#     points(rep(i + 1,10),replicate(10, metaMDS(x, autotransform = F, k = i + 1)$stress))
+#   }
+# }
+# 
+# # Use the function that we just defined to choose the optimal nr of dimensions
+# NMDS.scree(dist)
+# 
+# nmds1 <- metaMDS(dist, k = 3, trymax = 100, trace = F)
+# nmds1
+# plot(nmds1)
+# stressplot(nmds1)
+# 
+# plot(nmds1, type = "t", display = "sites")
+# 
+# plot(nmds1, display = "sites", type = "n", ylim =  c(-3, 3), xlim = c(-3, 3))
+# points(nmds1, display = "sites", col = "red", cex = 1.25)
+# text(nmds2, display ="species")
+# 
+# nmds2 <- metaMDS(species_sub10_1, k = 3, trymax = 100, trace = F, autotransform = FALSE, distance="bray")
+# plot(nmds2)
+# stressplot(nmds2)
+# 
+# plot(nmds2, display = "sites", type = "n", ylim =  c(-0.1, 0.1), xlim = c(-0.1, 0.1))
+# points(nmds2, display = "sites", col = "red", cex = 1.25)
+# text(nmds2, display ="species")
+# 
+# 
+# # The function envfit will add the environmental variables as vectors to the ordination plot
+# ef <- envfit(nmds1, env.var_sub10, permu = 999)
+# ef
+# 
+# # The two last columns are of interest: the squared correlation coefficient and the associated p-value
+# # Plot the vectors of the significant correlations and interpret the plot
+# plot(nmds1, type = "t", display = "sites")
+# plot(ef, p.max = 0.05)
+# # with(ef, ordihull(nmds1, ef$method, label = TRUE)) # Not working yet
 ```
 
 ## Procrustes error
@@ -205,7 +212,10 @@ procrustes(mds.best, mds.secbest, permutations = 999)
 protest(mds.best, mds.secbest, permutations = 999)
 
 plot(procrustes(mds.best, mds.secbest, permutations = 999))
+# plot(procrustes(mds.secbest, mds.thirdbest, permutations = 999))
 stressplot(mds.best)
+stressplot(mds.secbest)
+# stressplot(mds.thirdbest)
 
 ```
 
@@ -227,28 +237,45 @@ cor.test(dca2, gnmds2, method="k")
 # Bare punktene:
 plot(gnmds1, gnmds2, xlab = "gnmds1 (scaling in H.C. units)", ylab = "gnmds2 (scaling in H.C. units)", type = "n", 
      ylim =  c(-3, 3), xlim = c(-3, 3))
+# plot(gnmds1, gnmds3, xlab = "gnmds1 (scaling in H.C. units)", ylab = "gnmds2 (scaling in H.C. units)", type = "n", 
+#      ylim =  c(-3, 3), xlim = c(-3, 3))
 
   lines(c(-3, 3), c(0, 0), lty = 2, col = 8, lwd = 2)
   lines(c(0, 0), c(-3, 3), lty = 2, col = 8, lwd = 2)
-    
-  points(gnmds1, gnmds2, pch = 2, col = "cyan3", cex = 0.7) # all points, one symbol/ colour
-  points(gnmds1[env.var$method == "nat"], gnmds2[env.var$method == "nat"], pch = 3, col = "cyan3", cex = 0.7)
-  points(gnmds1[env.var$method == "ref"], gnmds2[env.var$method == "ref"], pch = 2, col = "darkorange", cex = 0.7)
-  points(gnmds1[env.var$method == "seed"], gnmds2[env.var$method == "seed"], pch = 1, col = "gold2", cex = 0.7)
-  points(gnmds1[env.var$method == "pn"], gnmds2[env.var$method == "pn"], pch = 4, col = "magenta", cex = 0.7)
+  
+  # all points, one symbol/ colour  
+  points(gnmds1, gnmds2, pch = 2, col = "cyan3", cex = 0.7) 
+  # points(gnmds1, gnmds3, pch = 3, col = "darkorange", cex = 0.7) # all points, one symbol/ colour
+  
+  # points ordered by "method"
+  points(gnmds1[env.var_sub10$method == "nat"], gnmds2[env.var_sub10$method == "nat"], pch = 3, col = "cyan3", cex = 0.7)
+  points(gnmds1[env.var_sub10$method == "ref"], gnmds2[env.var_sub10$method == "ref"], pch = 2, col = "darkorange", cex = 0.7)
+  points(gnmds1[env.var_sub10$method == "seed"], gnmds2[env.var_sub10$method == "seed"], pch = 1, col = "gold2", cex = 0.7)
+  points(gnmds1[env.var_sub10$method == "pn"], gnmds2[env.var_sub10$method == "pn"], pch = 4, col = "magenta", cex = 0.7)
 
 # Legger på vektorer for environmental variables
   mds.z <- envfit(scores(mds.best, choices = 1:2, origin = TRUE), env.var_sub10, 999)
-  plot(mds.z, col = 1,  cex = 0.7, p.max = 0.05)
-  plot(mds.z, arrow.mul = 1.6, col = 1, add = T, cex = 0.7)
+  mds.z_test <- envfit(scores(mds.best, choices = c(1,3), origin = TRUE), env.var_sub10, 999)
+  
+  plot(mds.z, col = 1,  cex = 0.7, p.max = 0.01)
+  plot(mds.z_test, col = 1,  cex = 0.7, p.max = 0.01)
+  # plot(mds.z, arrow.mul = 1.6, col = 1, add = T, cex = 0.7)
     
-  # env.plants <- envfit(gnmds.full ~ log2(Stone.gravel+1)+log2(Busk+1)+log2(invasive.abu+1)+log2(Areal)+log2(Konn), permutations=999, data=envir.full)
-  # env.plants
-  # fit <- envfit(gnmds.full, env.var, perm = 999)
-  # plot(fit, p.max = 0.05, col = "red")
+  colvec <- c("cyan3", "magenta", "darkorange", "gold2")
+  with(env.var_sub10, legend("topright", legend = levels(method), bty = "n",
+                      col = colvec, pch = 21, pt.bg = colvec))
 
   
-
+# library(goeveg)
+# ordiselect(matrix, ord, ablim = 1, fitlim = 1, choices = c(1, 2),
+#   method = "axes", env, p.max = 0.05, freq = FALSE)
+# 
+# ## Select the 30% most abundant species with 60% best environmental fit
+# ## in NDMS for axes 1 & 3
+# # nmds <- metaMDS(schedenveg, k = 3)   # run NMDS
+# env13 <- envfit(scores(mds.best, choices = 1:2, origin = TRUE), env.var_sub10, 999)
+# limited_env <- ordiselect(species_sub10_1, mds.best, ablim = 0.3, fitlim = 0.6,
+#    choices = c(1:2), method = "vars", env = env13)
 
 ```
 
@@ -283,6 +310,13 @@ ordiellipse(mds.best, env.var_sub10$grain_size_stand_f, display="sites", col=4, 
 ordiellipse(mds.best, env.var_sub10$grain_size_stand_f, display="sites", col=5, lty=1, lwd=2, show.groups = "5")
 ordiellipse(mds.best, env.var_sub10$grain_size_stand_f, display="sites", col=6, lty=1, lwd=2, show.groups = "6")
 
+ordiellipse(mds.best, env.var_sub10$year, display="sites", col=3, lty=1, lwd=2, show.groups = "2003")
+ordiellipse(mds.best, env.var_sub10$year, display="sites", col=7, lty=1, lwd=2, show.groups = "2007")
+ordiellipse(mds.best, env.var_sub10$year, display="sites", col=4, lty=1, lwd=2, show.groups = "2009")
+ordiellipse(mds.best, env.var_sub10$year, display="sites", col=5, lty=1, lwd=2, show.groups = "2011")
+ordiellipse(mds.best, env.var_sub10$year, display="sites", col=6, lty=1, lwd=2, show.groups = "2012")
+ordiellipse(mds.best, env.var_sub10$year, display="sites", col=2, lty=1, lwd=2, show.groups = "2014")
+ordiellipse(mds.best, env.var_sub10$year, display="sites", col=8, lty=1, lwd=2, show.groups = "2016")
 
 ordihull(mds.best, env.var$method, display="sites", col=3, lty=1, lwd=2, show.groups = "nat")
 ordihull(mds.best, env.var$method, display="sites", col=2, lty=1, lwd=2, show.groups = "pn")
@@ -300,7 +334,9 @@ ordihull(mds.best, env.var_sub10$region, display="sites", col="blue", lty=1, lwd
 ## To save gnmds
 ```{r}
 gnmds.full <- mds.best
-save(gnmds.full, file = "gnmds_full_2020_08_21.rda")
+save(gnmds.full, file = "gnmds_full_2020_08_25.rda") # vegdist = bray, K=3, with step-across
+
+save(mds.z, file="env.var_fit_2020_08_25.rda")
 
 ### Fra Mariannes og Siris script:
 
