@@ -296,8 +296,18 @@ ggplot(count_species_occur_ref_df, aes(occurrences, species)) +
 
 ```
 
-```{r}
 
+
+
+## --------------------- Axis scores --------------------
+```{r}
+ggplot(data = mean_gnmds1_data, aes(x = mean_gnmds1, y = ground_layer_c, fill = dist_int_veg)) +
+  geom_point(show.legend = F) +
+  theme_classic()
+
+ggplot(data = data_plots3, aes(caco)) + 
+  geom_histogram() +
+  theme_classic()
 
 ```
 
