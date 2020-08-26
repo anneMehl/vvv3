@@ -15,7 +15,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r standard, include=FALSE}
 # Libraries and import
 library(vegan)
-
+library(plyr)
+library(tidyverse)
 
 # species<- read.csv2("./data/species.csv", sep=";")
 # env.var<- read.csv2("./data/envvar3.csv", sep=";")
@@ -32,6 +33,11 @@ sum(rowSums(species) == 0)
 sum(colSums(species) == 0)
 which(colSums(species) == 0)
 species <- species[, -c(123)]
+species_richness <- rep(0, times=nrow(species))
+for(i in 1:nrow(species)){
+  species_richness[i] <- sum(species[i,] > 0)
+}
+species_richness <- as.data.frame(species_richness)
 
 env.var <- data_full[, c(6:43, 252)]
 str(env.var)
@@ -331,12 +337,58 @@ ordihull(mds.best, env.var_sub10$region, display="sites", col="blue", lty=1, lwd
 
 
 
-## To save gnmds
+## To save gnmds reults (mds and envfit)
 ```{r}
 gnmds.full <- mds.best
 save(gnmds.full, file = "gnmds_full_2020_08_25.rda") # vegdist = bray, K=3, with step-across
 
 save(mds.z, file="env.var_fit_2020_08_25.rda")
+
+```
+
+
+## Save axis scores
+```{r}
+
+env.var <- data_full[, c(1,6:43, 252)]
+str(env.var)
+env.var$site_type <- as.factor(env.var$site_type)
+env.var$method <- as.factor(env.var$method)
+env.var$exposure <- as.factor(env.var$exposure)
+env.var$year <- as.factor(env.var$year)
+env.var$grain_size_stand_f <- as.factor(env.var$grain_size_stand_f)
+env.var$id <- as.factor(env.var$id)
+
+env.var_sub10 <- env.var[-c(23, 181, 182, 241), ]
+
+## Utregning av gjennomsnittlig aksescore (til senere) - finnes i egen fil, coordinates.txt
+
+gnmds1 <- gnmds.full$points[, 1]
+gnmds2 <- gnmds.full$points[, 2]
+
+uid <- unique(data_full$id)
+
+# Akse1
+mean_gnmds1 <- rep(0, times=length(uid))
+for(i in 1:length(uid)) {
+  mean_gnmds1[i] <- mean(gnmds1[env.var_sub10$id == (uid[i])], na.rm=T)
+}
+mean_gnmds1
+mean_gnmds1_data <- as.data.frame(mean_gnmds1)
+mean_gnmds1_data <- cbind(mean_gnmds1_data, uid)
+mean_gnmds1_data
+
+# Akse 2
+mean_gnmds2 <- rep(0, times=length(uid))
+for(i in 1:length(uid)) {
+  mean_gnmds2[i] <- mean(gnmds2[env.var_sub10$id == (uid[i])], na.rm=T)
+}
+mean_gnmds2
+mean_gnmds2_data <- as.data.frame(mean_gnmds2)
+mean_gnmds2_data <- cbind(mean_gnmds2_data, uid)
+mean_gnmds2_data
+
+
 
 ### Fra Mariannes og Siris script:
 
