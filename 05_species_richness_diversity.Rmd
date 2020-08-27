@@ -17,19 +17,14 @@ library(MASS)
 library(plyr)
 library(tidyverse)
 
-load("processdata/data_species_wide2_2020_07_15.rda")
-load("processdata/data_species_wide2_sites_ref_2020_07_15.rda")
-load("processdata/data_species_wide2_sites_nor_2020_07_15.rda")
+load("processdata/species_sub5_2020_08_27.rda")
+load("processdata/envvar_full_sub5_2020_08_27.rda")
 
-head(data_species_wide2)
-names(data_species_wide2)
+head(species_sub5)
+names(species_sub5)
 
-#### Create dataframes grouped by sites and one for reference plots and one for normal plots
-# data_species_wide2_sites_nor <- data_species_wide2 %>%
-#   filter(reference == "no")
-# 
-# data_species_wide2_sites_ref <- data_species_wide2 %>%
-#   filter(reference == "yes")
+head(env.var_full_sub5)
+names(env.var_full_sub5)
 
 
 
