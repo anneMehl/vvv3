@@ -18,40 +18,131 @@ head(data_plots3)
 ```
 
 
-## ----------- Test for data distribution/ screwness ---------
-```{r}
-library(fitdistrplus)
+<!-- ## ----------- Test for data distribution/ screwness --------- -->
+<!-- ```{r} -->
+<!-- library(fitdistrplus) -->
 
-## If discrete is TRUE, the represented distributions are the Poisson, negative binomial distributions, and the normal distribution to which previous discrete distributions may converge. If discrete is FALSE, these are uniform, normal, logistic, lognormal, beta and gamma distributions.
+<!-- ## If discrete is TRUE, the represented distributions are the Poisson, negative binomial distributions, and the normal distribution to which previous discrete distributions may converge. If discrete is FALSE, these are uniform, normal, logistic, lognormal, beta and gamma distributions. -->
 
-# discrete = FALSE
-descdist(data_plots3$shannon, discrete = FALSE, boot = 500) # Normal, maybe lognormal
-descdist(data_plots3$simpson, discrete = FALSE, boot = 500) # beta
-descdist(data_plots3$sr_margalef, discrete = FALSE, boot = 500) # beta, maybe normal
-descdist(data_plots3$sr_menhinick, discrete = FALSE, boot = 500) # lognormal
+<!-- # discrete = FALSE -->
+<!-- descdist(data_plots3$shannon, discrete = FALSE, boot = 500) # Normal, maybe lognormal -->
+<!-- descdist(data_plots3$simpson, discrete = FALSE, boot = 500) # beta -->
+<!-- descdist(data_plots3$sr_margalef, discrete = FALSE, boot = 500) # beta, maybe normal -->
+<!-- descdist(data_plots3$sr_menhinick, discrete = FALSE, boot = 500) # lognormal -->
 
-# discrete = TRUE
-descdist(data_plots3$shannon, discrete = TRUE, boot = 500) # neg. binomial
-descdist(data_plots3$simpson, discrete = TRUE, boot = 500) # neg. binomial
-descdist(data_plots3$sr_margalef, discrete = TRUE, boot = 500) # normal or poisson
-descdist(data_plots3$sr_menhinick, discrete = TRUE, boot = 500) # neg. binomial
+<!-- # discrete = TRUE -->
+<!-- descdist(data_plots3$shannon, discrete = TRUE, boot = 500) # neg. binomial -->
+<!-- descdist(data_plots3$simpson, discrete = TRUE, boot = 500) # neg. binomial -->
+<!-- descdist(data_plots3$sr_margalef, discrete = TRUE, boot = 500) # normal or poisson -->
+<!-- descdist(data_plots3$sr_menhinick, discrete = TRUE, boot = 500) # neg. binomial -->
 
-```
+<!-- ``` -->
 
 
 ## correlation
 ```{r}
-cor_df <- data.frame(data_plots3$bare_soil_c, data_plots3$dist_int_veg, data_plots3$field_layer_c, data_plots3$shrub_layer_c, data_plots3$tree_layer_c, data_plots3$caco, data_plots3$slope, data_plots3$loi, data_plots3$mean_cover, data_plots3$sd_cover, data_plots3$total_cover_layers, data_plots3$shannon, data_plots3$simpson, data_plots3$sr_margalef, data_plots3$sr_menhinick)
-
-res <- cor(cor_df)
-
-library(Hmisc)
-library(corrplot)
-corrplot(res)
+# cor_df <- data.frame(data_plots3$bare_soil_c, data_plots3$dist_int_veg, data_plots3$field_layer_c, data_plots3$shrub_layer_c, data_plots3$tree_layer_c, data_plots3$caco, data_plots3$slope, data_plots3$loi, data_plots3$mean_cover, data_plots3$sd_cover, data_plots3$total_cover_layers, data_plots3$shannon, data_plots3$simpson, data_plots3$sr_margalef, data_plots3$sr_menhinick)
+# 
+# res <- cor(cor_df)
+# 
+# library(Hmisc)
+# library(corrplot)
+# corrplot(res)
 
 ```
 
 
+
+
+## -------------------- Linear mixed model with gmnds axis scores from AXIS 1 as response (all plots) -------------------
+```{r}
+lmer_method1 <- lmer(mean_gnmds1 ~ method + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+lmer_dist_int_veg1 <- lmer(mean_gnmds1 ~ dist_int_veg + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+lmer_loi1 <- lmer(mean_gnmds1 ~ loi + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+lmer_caco1 <- lmer(mean_gnmds1 ~ caco + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+lmer_expo1 <- lmer(mean_gnmds1 ~ exposure + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+lmer_grain_size1 <- lmer(mean_gnmds1 ~ grain_size_stand_f + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+lmer_site_type1 <- lmer(mean_gnmds1 ~ site_type + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+lmer_year1 <- lmer(mean_gnmds1 ~ year + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+
+
+AIC(lmer_method1, lmer_loi1, lmer_caco1, lmer_expo1, lmer_grain_size1, lmer_site_type1, lmer_year1)
+anova(lmer_method, lmer_loi)
+anova(lmer_method, lmer_caco)
+anova(lmer_method, lmer_dist_int_veg)
+
+
+lmerfull1 <- lmer(mean_gnmds1 ~ dist_int_veg + loi + caco + exposure + grain_size_stand_f + method + site_type + year + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+summary(lmerfull)
+
+m1_a1 <- lmer(mean_gnmds1 ~ method + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+m2_a1 <- lmer(mean_gnmds1 ~ method + caco + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+m3_a1 <- lmer(mean_gnmds1 ~ method + caco + loi + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+m4_a1 <- lmer(mean_gnmds1 ~ method + caco + loi + exposure + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+m5_a1 <- lmer(mean_gnmds1 ~ method + caco + loi + exposure + year + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+
+
+AIC(m1_a1, m2_a1, m3_a1, m4_a1, m5_a1)
+#       df      AIC
+# m1_a1  6 274.1463
+# m2_a1  7 251.9221
+# m3_a1  8 248.5197  # BEST
+# m4_a1 16 255.9748
+# m5_a1 22 249.9681  # 2nd
+
+
+summary(m3_a1)
+
+```
+
+
+
+## -------------------- Linear mixed model with gmnds axis scores from AXIS 2 as response (all plots) -------------------
+```{r}
+lmer_method2 <- lmer(mean_gnmds2 ~ method + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+lmer_dist_int_veg1 <- lmer(mean_gnmds2 ~ dist_int_veg + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+lmer_loi2 <- lmer(mean_gnmds2 ~ loi + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+lmer_caco2 <- lmer(mean_gnmds2 ~ caco + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+lmer_expo2 <- lmer(mean_gnmds2 ~ exposure + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+lmer_grain_size2 <- lmer(mean_gnmds2 ~ grain_size_stand_f + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+lmer_site_type2 <- lmer(mean_gnmds2 ~ site_type + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+lmer_year2 <- lmer(mean_gnmds2 ~ year + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+
+
+AIC(lmer_method2, lmer_loi2, lmer_caco2, lmer_expo2, lmer_grain_size2, lmer_site_type2, lmer_year2)
+anova(lmer_caco2, lmer_loi2)
+anova(lmer_site_type2, lmer_loi2)
+
+
+lmerfull2 <- lmer(mean_gnmds2 ~ dist_int_veg + loi + caco + exposure + grain_size_stand_f + method + site_type + year + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+summary(lmerfull)
+
+m1_a2 <- lmer(mean_gnmds2 ~ method + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+m2_a2 <- lmer(mean_gnmds2 ~ method + caco + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+m3_a2 <- lmer(mean_gnmds2 ~ method + caco + loi + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+m4_a2 <- lmer(mean_gnmds2 ~ method + caco + loi + exposure + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+m5_a2 <- lmer(mean_gnmds2 ~ method + caco + loi + exposure + year + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+m6_a2 <- lmer(mean_gnmds2 ~ method + caco + loi + site_type + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+m7_a2 <- lmer(mean_gnmds2 ~ method + caco + loi + site_type + exposure + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+m8_a2 <- lmer(mean_gnmds2 ~ method + caco + loi + site_type + exposure + year + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+
+
+AIC(m1_a2, m2_a2, m3_a2, m4_a2, m5_a2, m6_a2, m7_a2, m8_a2)
+#       df      AIC
+# m1_a2  6 322.3958  # BEST
+# m2_a2  7 323.4603
+# m3_a2  8 323.3754  # 2nd
+# m4_a2 16 330.8082
+# m5_a2 22 335.9778
+# m6_a2  9 325.3553
+# m7_a2 17 332.8054
+# m8_a2 23 337.9731
+
+
+summary(m1_a2)
+summary(m3_a2)
+
+```
 
 
 
@@ -62,17 +153,8 @@ corrplot(res)
 library(lme4)
 library(lmerTest)
 
-#### random factor selection ----
-lm0_rand <- lmer(shannon ~ dist_int_veg + total_cover_layers + field_layer_h + caco + slope + exposure + grain_size_stand_f + loi + method + site_type + year + (1|site_id/plot_id), data = data_plots3, REML = F) # Error: number of levels of each grouping factor must be < number of observations (problems: plotnumb:siteID)
 
-lm1_rand <- lmer(shannon ~ dist_int_veg + total_cover_layers + field_layer_h + caco + slope + exposure + grain_size_stand_f + loi + method + site_type + year + (1|site_id), data = data_plots3, REML = F) #1
-
-lm2_rand <- lmer(shannon ~ dist_int_veg + total_cover_layers + field_layer_h + caco + slope + exposure + grain_size_stand_f + loi + method + site_type + year +(1|plot_id), data = data_plots3, REML = F)
-
-
-
-#### models ----
-lm0 <- lmer(shannon ~ dist_int_veg + total_cover_layers + field_layer_h + caco + slope + exposure + grain_size_stand_f + loi + method + (1|site_id), data = data_plots3, REML = F)
+lm0_sh <- lmer(shannon ~ dist_int_veg + total_cover_layers + field_layer_h + caco + slope + exposure + grain_size_stand_f + loi + method + (1|site_id), data = data_plots3, REML = F)
 
 lm1 <- lmer(shannon ~ dist_int_veg + total_cover_layers  + caco + exposure + grain_size_stand_f + (1|site_id), data = data_plots3, REML = F)
 lm2 <- lmer(shannon ~ dist_int_veg + total_cover_layers  + caco + grain_size_stand_f + (1|site_id), data = data_plots3, REML = F) 
