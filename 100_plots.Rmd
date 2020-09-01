@@ -305,10 +305,15 @@ ggplot(data = mean_gnmds1_data, aes(x = mean_gnmds1, y = ground_layer_c, fill = 
   geom_point(show.legend = F) +
   theme_classic()
 
-ggplot(data = data_plots3, aes(caco)) + 
-  geom_histogram() +
-  theme_classic()
-
 ```
 
+
+
+
+
+## ------------------- Stuff --------------------------
+```{r}
+plot(env.var_full_sub5$grain_size_stand_f)
+
+```
 

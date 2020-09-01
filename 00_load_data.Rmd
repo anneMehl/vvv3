@@ -55,6 +55,10 @@ load("processdata/data_plots4_2020_08_18.rda") # Like data_plots3, with restorat
 load("processdata/data_full_2020_08_19.rda")
 load("processdata/data_full_2020_08_24.rda") # including region
 
+load("processdata/envvar_full_sub5_2020_08_27.rda")
+load("processdata/env.var_sub5_2020_08_27.rda")
+load("processdata/envvar_full_sub5_2020_08_31.rda") # columns 43 and 44 (mean gnmds) are from ordination with epsilon 0.9 and k=3; columns 45 and 46 (mean gnmds) are from ordination with epsilon 0.95 and k=4
+
 ```
 
 
@@ -98,6 +102,8 @@ load("processdata/data_species_wide3_sites_2020_07_15.rda")
 
 # like data_species_wide3, with new site and plot columns:
 load("processdata/data_species4_2020_08_18.rda")
+
+load("processdata/species_sub5_2020_08_27.rda")
 
 head(data_species_wide)
 
