@@ -484,6 +484,7 @@ library(dplyr)
 
 data_full <- inner_join(data_plots4, data_species_wide4, by = "id")
 
+
 save(data_full, file = "data_full_2020_08_19.rda")
 
 
