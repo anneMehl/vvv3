@@ -55,8 +55,13 @@ head(data_plots4)
 
 
 ## -------------------- Linear mixed model with gmnds axis scores from AXIS 1 as response (all plots) -------------------
-Axis scales retrieved from ordination with dataset species_sub5 epsilon 0.9 and k=3 (load("processdata/envvar_full_sub5_2020_08_27.rda"))
+Axis scales retrieved from ordination with dataset species_sub5 epsilon 0.9 and k=3 (load("processdata/envvar_full_sub5_2020_08_31.rda")), then use column 43 and 44 for gmnds values
 ```{r}
+library(lme4)
+library(lmerTest)
+env.var_full_sub5 <- env.var_full_sub5[, c(1:44)]
+str(env.var_full_sub5)
+
 lmer_method1 <- lmer(mean_gnmds1 ~ method + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
 lmer_dist_int_veg1 <- lmer(mean_gnmds1 ~ dist_int_veg + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
 lmer_loi1 <- lmer(mean_gnmds1 ~ loi + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
@@ -84,7 +89,7 @@ m5_a1 <- lmer(mean_gnmds1 ~ method + caco + loi + exposure + year + (1|site_id_n
 # interaction between year and method
 
 
-AIC(m1_a1, m2_a1, m3_a1, m4_a1, m5_a1)
+AIC(lmerfull1, m1_a1, m2_a1, m3_a1, m4_a1, m5_a1)
 #       df      AIC
 # m1_a1  6 274.1463
 # m2_a1  7 251.9221
@@ -92,15 +97,50 @@ AIC(m1_a1, m2_a1, m3_a1, m4_a1, m5_a1)
 # m4_a1 16 255.9748
 # m5_a1 22 249.9681  # 2nd
 
+library(AICcmodavg)
 
-summary(m3_a1)
+Cand.models <- list( )
+Cand.models[[1]] <- lmer(mean_gnmds1 ~ method + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+Cand.models[[2]] <- lmer(mean_gnmds1 ~ method + caco + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+Cand.models[[3]] <- lmer(mean_gnmds1 ~ method + caco + loi + (1|site_id_new.x), data = env.var_full_sub5, REML = F) # BEST
+Cand.models[[4]] <- lmer(mean_gnmds1 ~ method + caco + loi + exposure + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+Cand.models[[5]] <- lmer(mean_gnmds1 ~ method + caco + loi + exposure + year + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+
+aictab(Cand.models, second.ord = F) 
+
+
+
+summary(m3_a1_reml)
+
+m3_a1_reml <- lmer(mean_gnmds1 ~ method + caco + loi + (1|site_id_new.x), data = env.var_full_sub5, REML = T)
+
+```
+
+#### Checking assumptions
+```{r}
+library(sjPlot)
+plot_model(m3_a1_reml, type = "diag")
+
+```
+
+
+#### Plot results
+```{r}
+plot_model(m3_a1_reml, type = "est", show.intercept = T)
+plot_model(m3_a1_reml, type = "eff", terms = "method")
+plot_model(m3_a1_reml, type = "eff", terms = "caco")
+plot_model(m3_a1_reml, type = "eff", terms = "loi")
+
+tab_model(m3_a1_reml, p.style = "stars")
 
 ```
 
 
 
+
 ## -------------------- Linear mixed model with gmnds axis scores from AXIS 2 as response (all plots) -------------------
 Axis scales retrieved from ordination with dataset species_sub5 epsilon 0.9 and k=3
+#### Model selection
 ```{r}
 lmer_method2 <- lmer(mean_gnmds2 ~ method + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
 lmer_dist_int_veg1 <- lmer(mean_gnmds2 ~ dist_int_veg + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
@@ -141,9 +181,46 @@ AIC(m1_a2, m2_a2, m3_a2, m4_a2, m5_a2, m6_a2, m7_a2, m8_a2)
 # m7_a2 17 332.8054
 # m8_a2 23 337.9731
 
+library(AICcmodavg)
+
+Cand.models <- list( )
+Cand.models[[1]] <- lmer(mean_gnmds2 ~ dist_int_veg + loi + caco + exposure + grain_size_stand_f + method + site_type + year + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+Cand.models[[2]] <- lmer(mean_gnmds2 ~ method + (1|site_id_new.x), data = env.var_full_sub5, REML = F) # Best
+Cand.models[[3]] <- lmer(mean_gnmds2 ~ method + caco + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+Cand.models[[4]] <- lmer(mean_gnmds2 ~ method + caco + loi + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+Cand.models[[5]] <- lmer(mean_gnmds2 ~ method + caco + loi + exposure + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+Cand.models[[6]] <- lmer(mean_gnmds2 ~ method + caco + loi + exposure + year + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+Cand.models[[7]] <- lmer(mean_gnmds2 ~ method + caco + loi + site_type + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+Cand.models[[8]] <- lmer(mean_gnmds2 ~ method + caco + loi + site_type + exposure + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+Cand.models[[9]] <- lmer(mean_gnmds2 ~ method + caco + loi + site_type + exposure + year + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+
+aictab(Cand.models, second.ord = F) 
+
 
 summary(m1_a2)
 summary(m3_a2)
+
+m1_a2_reml <- lmer(mean_gnmds2 ~ method + (1|site_id_new.x), data = env.var_full_sub5, REML = T) 
+
+```
+
+#### Checking assumptions
+```{r}
+library(sjPlot)
+plot_model(m1_a2_reml, type = "diag")
+
+```
+
+
+#### Plot results
+```{r}
+plot_model(m1_a2_reml, type = "est", show.intercept = T)
+plot_model(m1_a2_reml, type = "eff", terms = "method")
+plot_model(m1_a2_reml, type = "eff", terms = "caco")
+plot_model(m1_a2_reml, type = "eff", terms = "loi")
+plot_model(m1_a2_reml, type = "eff", terms = "year")
+
+tab_model(m1_a2_reml, p.style = "stars")
 
 ```
 
@@ -151,7 +228,7 @@ summary(m3_a2)
 
 
 ## -------------------- Linear mixed model with gmnds axis scores from AXIS 1 as response (all plots) -------------------
-Axis scales retrieved from ordination with dataset species_sub5 epsilon 0.95 and k=4 (load("processdata/envvar_full_sub5_2020_08_31.rda"))
+Axis scales retrieved from ordination with dataset species_sub5 epsilon 0.95 and k=4 (load("processdata/envvar_full_sub5_2020_08_31.rda")), then use columns 45 and 46 for gnmds
 
 ```{r}
 env.var_full_sub5 <- env.var_full_sub5[, c(1:42, 45:46)]
@@ -216,6 +293,15 @@ AIC(m6_a1, m8_a1, m9_a1)
 # m6_a1 14 188.0477 # BEST 
 # m8_a1 14 192.3133
 # m9_a1 14 190.9339
+
+
+library(AICcmodavg)
+
+Cand.models <- list( )
+Cand.models[[1]] <- 
+
+aictab(Cand.models, second.ord = F) 
+
 
 
 m6_a1_reml <- lmer(mean_gnmds1 ~ method + caco + loi + year + (1|site_id_new.x), data = env.var_full_sub5, REML = T)
@@ -285,6 +371,14 @@ AIC(m1_a2, m2_a2, m3_a2, m4_a2, m5_a2, m6_a2, m7_a2, m8_a2)
 # m6_a2  8 297.9013
 # m7_a2 14 292.9709
 # m8_a2 22 291.5535  # BEST
+
+library(AICcmodavg)
+
+Cand.models <- list( )
+Cand.models[[1]] <- 
+  
+aictab(Cand.models, second.ord = F) 
+
 
 
 summary(m8_a2)
