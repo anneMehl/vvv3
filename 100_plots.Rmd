@@ -102,46 +102,72 @@ fig_mean_groundlayer_site <- ggplot(data = data_plots, aes(x = site, y = ground_
 
 
 #### covers vs. method ----
-hist_method <- ggplot(data = data_plots, aes(method)) + 
+hist_method <- ggplot(data = env.var_full_sub5, aes(method)) + 
   geom_bar() +
   theme_classic()
 
 
-fig_fieldlayer_method <- ggplot(data = data_plots, aes(x = method, y = field_layer_c, fill = method)) +
+fig_fieldlayer_method <- ggplot(data = env.var_full_sub5, aes(x = method, y = field_layer_c, fill = method)) +
   geom_boxplot(show.legend = F) +
   theme_classic()
 
-fig_mean_fieldlayer_method <- ggplot(data = data_plots, aes(x = method, y = field_layer_c)) + geom_point() + 
+fig_mean_fieldlayer_method <- ggplot(data = env.var_full_sub5, aes(x = method, y = field_layer_c)) + geom_point() + 
   stat_summary(fun.data = "mean_cl_normal", colour = "red", size = 2) +
   theme_classic()
 
 
-fig_shrublayer_method <- ggplot(data = data_plots, aes(x = method, y = shrub_layer_c, fill = method)) +
+fig_shrublayer_method <- ggplot(data = env.var_full_sub5, aes(x = method, y = shrub_layer_c, fill = method)) +
   geom_boxplot(show.legend = F) +
   theme_classic()
 
-fig_mean_shrublayer_method <- ggplot(data = data_plots, aes(x = method, y = shrub_layer_c)) + geom_point() + 
+fig_mean_shrublayer_method <- ggplot(data = env.var_full_sub5, aes(x = method, y = shrub_layer_c)) + geom_point() + 
   stat_summary(fun.data = "mean_cl_normal", colour = "red", size = 2) +
   theme_classic()
 
 
-fig_treelayer_method <- ggplot(data = data_plots, aes(x = method, y = tree_layer_c, fill = method)) +
+fig_treelayer_method <- ggplot(data = env.var_full_sub5, aes(x = method, y = tree_layer_c, fill = method)) +
   geom_boxplot(show.legend = F) +
   theme_classic()
 
-fig_mean_treelayer_method <- ggplot(data = data_plots, aes(x = method, y = tree_layer_c)) + geom_point() + 
+fig_mean_treelayer_method <- ggplot(data = env.var_full_sub5, aes(x = method, y = tree_layer_c)) + geom_point() + 
   stat_summary(fun.data = "mean_cl_normal", colour = "red", size = 2) +
   theme_classic()
 
 
-fig_groundlayer_method <- ggplot(data = data_plots, aes(x = method, y = ground_layer_c, fill = method)) +
+fig_groundlayer_method <- ggplot(data = env.var_full_sub5, aes(x = method, y = ground_layer_c, fill = method)) +
   geom_boxplot(show.legend = F) +
   theme_classic()
 
-fig_mean_groundlayer_method <- ggplot(data = data_plots, aes(x = method, y = ground_layer_c)) + geom_point() + 
+fig_mean_groundlayer_method <- ggplot(data = env.var_full_sub5, aes(x = method, y = ground_layer_c)) + geom_point() + 
   stat_summary(fun.data = "mean_cl_normal", colour = "red", size = 2) +
   theme_classic()
 
+
+#### heigts vs. method ----
+
+ggplot(data = env.var_full_sub5, aes(x = method, y = field_layer_h, fill = method)) +
+  geom_boxplot(show.legend = F) +
+  theme_classic()
+
+ggplot(data = env.var_full_sub5, aes(x = method, y = shrub_layer_h1, fill = method)) +
+  geom_boxplot(show.legend = F) +
+  theme_classic()
+
+ggplot(data = env.var_full_sub5, aes(x = method, y = shrub_layer_h2, fill = method)) +
+  geom_boxplot(show.legend = F) +
+  theme_classic()
+
+ggplot(data = env.var_full_sub5, aes(x = method, y = tree_layer_h1, fill = method)) +
+  geom_boxplot(show.legend = F) +
+  theme_classic()
+
+ggplot(data = env.var_full_sub5, aes(x = method, y = tree_layer_h2, fill = method)) +
+  geom_boxplot(show.legend = F) +
+  theme_classic()
+
+ggplot(data = env.var_full_sub5, aes(x = method, y = tree_layer_h3, fill = method)) +
+  geom_boxplot(show.legend = F) +
+  theme_classic()
 
 
 #### covers vs. grain size ----
