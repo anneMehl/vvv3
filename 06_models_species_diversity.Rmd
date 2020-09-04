@@ -54,7 +54,7 @@ head(data_plots4)
 
 
 
-## -------------------- Linear mixed model with gmnds axis scores from AXIS 1 as response (all plots) -------------------
+## -------------------- Linear mixed model with Ordi 1 gmnds axis scores from AXIS 1 as response (all plots) -------------------
 Axis scales retrieved from ordination with dataset species_sub5 epsilon 0.9 and k=3 (load("processdata/envvar_full_sub5_2020_08_31.rda")), then use column 43 and 44 for gmnds values
 ```{r}
 library(lme4)
@@ -138,7 +138,7 @@ tab_model(m3_a1_reml, p.style = "stars")
 
 
 
-## -------------------- Linear mixed model with gmnds axis scores from AXIS 2 as response (all plots) -------------------
+## -------------------- Linear mixed model with Ordi 1 gmnds axis scores from AXIS 2 as response (all plots) -------------------
 Axis scales retrieved from ordination with dataset species_sub5 epsilon 0.9 and k=3
 #### Model selection
 ```{r}
@@ -216,9 +216,6 @@ plot_model(m1_a2_reml, type = "diag")
 ```{r}
 plot_model(m1_a2_reml, type = "est", show.intercept = T)
 plot_model(m1_a2_reml, type = "eff", terms = "method")
-plot_model(m1_a2_reml, type = "eff", terms = "caco")
-plot_model(m1_a2_reml, type = "eff", terms = "loi")
-plot_model(m1_a2_reml, type = "eff", terms = "year")
 
 tab_model(m1_a2_reml, p.style = "stars")
 
@@ -227,7 +224,7 @@ tab_model(m1_a2_reml, p.style = "stars")
 
 
 
-## -------------------- Linear mixed model with gmnds axis scores from AXIS 1 as response (all plots) -------------------
+## -------------------- Linear mixed model with Ordi 2 gmnds axis scores from AXIS 1 as response (all plots) -------------------
 Axis scales retrieved from ordination with dataset species_sub5 epsilon 0.95 and k=4 (load("processdata/envvar_full_sub5_2020_08_31.rda")), then use columns 45 and 46 for gnmds
 
 ```{r}
@@ -298,7 +295,17 @@ AIC(m6_a1, m8_a1, m9_a1)
 library(AICcmodavg)
 
 Cand.models <- list( )
-Cand.models[[1]] <- 
+Cand.models[[1]] <- lmer(mean_gnmds1 ~ dist_int_veg + loi + caco + exposure + grain_size_stand_f + method + site_type + year + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+Cand.models[[2]] <- lmer(mean_gnmds1 ~ method + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+Cand.models[[3]] <- lmer(mean_gnmds1 ~ method + caco + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+Cand.models[[4]] <- lmer(mean_gnmds1 ~ method + caco + loi + (1|site_id_new.x), data = env.var_full_sub5, REML = F) 
+Cand.models[[5]] <- lmer(mean_gnmds1 ~ method + caco + loi + exposure + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+Cand.models[[6]] <- lmer(mean_gnmds1 ~ method + caco + loi + exposure + year + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+Cand.models[[7]] <- lmer(mean_gnmds1 ~ method + caco + loi + year + (1|site_id_new.x), data = env.var_full_sub5, REML = F) # BEST
+Cand.models[[8]] <- lmer(mean_gnmds1 ~ method*year + caco + loi +  (1|site_id_new.x), data = env.var_full_sub5, REML = F) # Best, but what's with the warning???
+# fixed-effect model matrix is rank deficient so dropping 10 columns / coefficients
+Cand.models[[9]] <- lmer(mean_gnmds1 ~ method + log(caco+1) + log(loi+1) + year + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+Cand.models[[10]] <- lmer(mean_gnmds1 ~ method + caco + log(loi+1) + year + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
 
 aictab(Cand.models, second.ord = F) 
 
@@ -320,7 +327,10 @@ plot_model(m6_a1_reml, type = "diag")
 
 #### Plot results
 ```{r}
+tab_model(m6_a1_reml, p.style = "stars")
+
 plot_model(m6_a1_reml, type = "est", show.intercept = T)
+
 plot_model(m6_a1_reml, type = "eff", terms = "method")
 plot_model(m6_a1_reml, type = "eff", terms = "caco")
 plot_model(m6_a1_reml, type = "eff", terms = "loi")
@@ -375,8 +385,16 @@ AIC(m1_a2, m2_a2, m3_a2, m4_a2, m5_a2, m6_a2, m7_a2, m8_a2)
 library(AICcmodavg)
 
 Cand.models <- list( )
-Cand.models[[1]] <- 
-  
+Cand.models[[1]] <- lmer(mean_gnmds2 ~ dist_int_veg + loi + caco + exposure + grain_size_stand_f + method + site_type + year + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+Cand.models[[2]] <- lmer(mean_gnmds2 ~ method + (1|site_id_new.x), data = env.var_full_sub5, REML = F) 
+Cand.models[[3]] <- lmer(mean_gnmds2 ~ method + year + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+Cand.models[[4]] <- lmer(mean_gnmds2 ~ method + exposure + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+Cand.models[[5]] <- lmer(mean_gnmds2 ~ method + year + exposure + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+Cand.models[[6]] <- lmer(mean_gnmds2 ~ method + dist_int_veg + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+Cand.models[[7]] <- lmer(mean_gnmds2 ~ method + dist_int_veg + caco + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+Cand.models[[8]] <- lmer(mean_gnmds2 ~ method + year + caco + dist_int_veg + (1|site_id_new.x), data = env.var_full_sub5, REML = F) 
+Cand.models[[9]] <- lmer(mean_gnmds2 ~ method + year + caco + dist_int_veg + exposure + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+
 aictab(Cand.models, second.ord = F) 
 
 
@@ -398,7 +416,10 @@ plot_model(m8_a2_reml, type = "diag")
 
 #### Plot results
 ```{r}
+tab_model(m8_a2_reml, p.style = "stars")
+
 plot_model(m8_a2_reml, type = "est", show.intercept = T)
+
 plot_model(m8_a2_reml, type = "eff", terms = "method")
 plot_model(m8_a2_reml, type = "eff", terms = "caco")
 plot_model(m8_a2_reml, type = "eff", terms = "exposure")
@@ -425,6 +446,12 @@ library(lme4)
 library(lmerTest)
 
 plots_full <- data_full[, c(1, 3, 6:43, 47, 252)]
+str(plots_full)
+plots_full$method <- as.factor(plots_full$method)
+plots_full$grain_size_stand_f <- as.factor(plots_full$grain_size_stand_f)
+plots_full$exposure <- as.factor(plots_full$exposure)
+plots_full$year <- as.factor(plots_full$year)
+
 
 
 lmfull_sh <- lmer(shannon.x ~ dist_int_veg + caco + slope + exposure + grain_size_stand_f + loi + method + year + (1|site_id_new.x), data = plots_full, REML = F)
@@ -458,11 +485,10 @@ aictab(Cand.models, second.ord = F)
 # Model selection based on AIC:
 # 
 #       K    AIC Delta_AIC AICWt Cum.Wt      LL
-# Mod2 16 280.04      0.00  0.68   0.68 -124.02
-# Mod3 15 282.97      2.93  0.16   0.84 -126.48
-# Mod4 16 283.66      3.61  0.11   0.95 -125.83
-# Mod1 20 285.15      5.10  0.05   1.00 -122.57
-
+# Mod2 19 282.13      0.00  0.78   0.78 -122.07
+# Mod3 18 284.93      2.80  0.19   0.97 -124.47
+# Mod1 28 289.37      7.23  0.02   0.99 -116.68
+# Mod4 24 290.73      8.60  0.01   1.00 -121.37
 
 summary(lm1_sh)
 ```
@@ -478,8 +504,14 @@ plot_model(lm1_sh_reml, type = "diag") ## Violates assumtion of normality of res
 
 #### Plot results
 ```{r}
+tab_model(lm1_sh_reml, p.style = "stars")
+
 plot_model(lm1_sh_reml, type = "est", show.intercept = T)
-plot_model(lm1_sh_reml, type = "eff")
+
+plot_model(lm1_sh_reml, type = "eff", terms = "method")
+plot_model(lm1_sh_reml, type = "eff", terms = "caco")
+plot_model(lm1_sh_reml, type = "eff", terms = "exposure")
+plot_model(lm1_sh_reml, type = "eff", terms = "grain_size_stand_f")
 
 
 ```
