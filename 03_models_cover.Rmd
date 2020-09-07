@@ -22,30 +22,30 @@ head(data_species_wide2_reference)
 ```
 
 
-## ----------- Test for data distribution/ screwness ---------
-```{r}
-library(fitdistrplus)
+<!-- ## ----------- Test for data distribution/ screwness --------- -->
+<!-- ```{r} -->
+<!-- library(fitdistrplus) -->
 
-descdist(data_plots2_normal$field_layer_c, discrete = FALSE, boot = 500)
-descdist(data_plots2_normal$shrub_layer_c, discrete = FALSE, boot = 500)
-descdist(data_plots2_normal$tree_layer_c, discrete = FALSE, boot = 500)
+<!-- descdist(data_plots2_normal$field_layer_c, discrete = FALSE, boot = 500) -->
+<!-- descdist(data_plots2_normal$shrub_layer_c, discrete = FALSE, boot = 500) -->
+<!-- descdist(data_plots2_normal$tree_layer_c, discrete = FALSE, boot = 500) -->
 
-descdist(data_plots3$total_cover_layers, discrete = FALSE, boot = 500)
-descdist(data_plots3$mean_cover, discrete = FALSE, boot = 500)
-descdist(data_plots3$total_cover_layers, discrete = TRUE, boot = 500)
-descdist(data_plots3$mean_cover, discrete = TRUE, boot = 500)
+<!-- descdist(data_plots3$total_cover_layers, discrete = FALSE, boot = 500) -->
+<!-- descdist(data_plots3$mean_cover, discrete = FALSE, boot = 500) -->
+<!-- descdist(data_plots3$total_cover_layers, discrete = TRUE, boot = 500) -->
+<!-- descdist(data_plots3$mean_cover, discrete = TRUE, boot = 500) -->
 
-descdist(data_plots2_reference$field_layer_c, discrete = FALSE, boot = 500)
-descdist(data_plots2_reference$shrub_layer_c, discrete = FALSE, boot = 500)
-descdist(data_plots2_reference$tree_layer_c, discrete = FALSE, boot = 500)
+<!-- descdist(data_plots2_reference$field_layer_c, discrete = FALSE, boot = 500) -->
+<!-- descdist(data_plots2_reference$shrub_layer_c, discrete = FALSE, boot = 500) -->
+<!-- descdist(data_plots2_reference$tree_layer_c, discrete = FALSE, boot = 500) -->
 
-descdist(data_plots2_reference$total_cover_layers, discrete = FALSE, boot = 500)
+<!-- descdist(data_plots2_reference$total_cover_layers, discrete = FALSE, boot = 500) -->
 
 
-descdist(data_plots3$field_layer_c, discrete = FALSE, boot = 500)
-descdist(data_plots3$field_layer_c, discrete = TRUE, boot = 500)
+<!-- descdist(data_plots3$field_layer_c, discrete = FALSE, boot = 500) -->
+<!-- descdist(data_plots3$field_layer_c, discrete = TRUE, boot = 500) -->
 
-```
+<!-- ``` -->
 
 
 ## correlation
