@@ -58,6 +58,10 @@ load("processdata/data_full_2020_08_24.rda") # including region
 load("processdata/envvar_full_sub5_2020_08_27.rda")
 load("processdata/env.var_sub5_2020_08_27.rda")
 load("processdata/envvar_full_sub5_2020_08_31.rda") # columns 43 and 44 (mean gnmds) are from ordination with epsilon 0.9 and k=3; columns 45 and 46 (mean gnmds) are from ordination with epsilon 0.95 and k=4
+load("processdata/env.var_full_sub5_2020_09_08.rda") # like envvar_full_sub5_2020_08_31.rda, but with changes categories exposure and grain size
+
+load("processdata/plots_full_shannon_2020_09_08.rda") # for shanon diversity
+
 
 ```
 
