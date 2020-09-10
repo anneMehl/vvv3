@@ -29,79 +29,6 @@ library(dplyr)
 
 
 
-
-species <- data_full[, c(56:244)]
-str(species)
-sum(rowSums(species) == 0)
-sum(colSums(species) == 0)
-which(colSums(species) == 0)
-species <- species[, -c(123)]
-
-
-species_richness <- rep(0, times=nrow(species))
-for(i in 1:nrow(species)){
-  species_richness[i] <- sum(species[i,] > 0)
-}
-species_richness <- as.data.frame(species_richness)
-species_2 <- cbind(species, species_richness)
-
-species_sub5 <- subset(species_2, species_richness >5)
-sum(rowSums(species_sub5) == 0)
-sum(colSums(species_sub5) == 0)
-which(colSums(species_sub5) == 0)
-
-species_sub5 <- species_sub5[, -c(61, 110, 119, 160, 186, 189)]
-which(colSums(species_sub5) == 0)
-names(species_sub5)
-
-
-
-env.var <- data_full[, c(6:43, 252)]
-str(env.var)
-env.var <- env.var[, c(1:3, 8, 26, 29:30, 35:36, 39)]
-env.var$site_type <- as.factor(env.var$site_type)
-env.var$method <- as.factor(env.var$method)
-env.var$exposure <- as.factor(env.var$exposure)
-env.var$year <- as.factor(env.var$year)
-env.var$grain_size_stand_f <- as.factor(env.var$grain_size_stand_f)
-
-env.var_2 <- cbind(env.var, species_richness)
-env.var_sub5 <- subset(env.var_2, species_richness >5)
-env.var_sub5 <- env.var_sub5[, -c(11)]
-names(env.var_sub5)
-
-
-save(species_sub5, file = "species_sub5_2020_208_27.rda")
-save(env.var_sub5, file = "env.var_sub5_2020_208_27.rda")
-
-
-
-str(env.var_sub5$grain_size_stand_f)
-table(env.var_sub5$grain_size_stand_f)
- #  1   2   3   5   6
- # 27   0  13   2 177
-env.var_sub5$grain_size_stand_f <- as.numeric(env.var_sub5$grain_size_stand_f)
-env.var_sub5$grain_size_stand_f <- ifelse(env.var_sub5$grain_size_stand_f >= 4, 6, env.var_sub5$grain_size_stand_f)
-table(env.var_sub5$grain_size_stand_f)
- #  1   3   6
- # 27  13 179
-env.var_sub5$grain_size_stand_f <- as.factor(env.var_sub5$grain_size_stand_f)
-str(env.var_sub5$grain_size_stand_f)
-table(env.var_sub5$grain_size_stand_f)
-
-
-str(env.var_sub5$exposure)
-table(env.var_sub5$exposure)
-  # E   F   N  NE  NW   S  SE  SW   W 
-  # 9 124  31   1   6  19  13   6  10
-levels(env.var_sub5$exposure)[levels(env.var_sub5$exposure)=="NE"] <- "N"
-str(env.var_sub5)
-table(env.var_sub5$exposure)
-
-
-
-save(env.var_sub5, file = "env.var_sub5_2020_09_08.rda")
-
 ```
 
 
@@ -135,13 +62,13 @@ k = 4 # k determines the number of dimensions in the ordination
 ## Define a general, empty object called mds:
 mds <- NULL
 ## Making 100 "mds"s from initial starting configurations, allocating them into the mds object:
-for(i in 1:100)
-{mds[[i]]<-monoMDS(dist.y, matrix(c(runif(dim(species_sub5)[1]*k)),nrow=dim(species_sub5)[1]),
-  k=3, model = "global", maxit=200, smin = 1e-7, sfgrmin = 1e-7)}
+# for(i in 1:100)
+# {mds[[i]]<-monoMDS(dist.y, matrix(c(runif(dim(species_sub5)[1]*k)),nrow=dim(species_sub5)[1]),
+#   k=3, model = "global", maxit=200, smin = 1e-7, sfgrmin = 1e-7)}
 
 for(i in 1:100)
 {mds[[i]]<-monoMDS(geodist.y, matrix(c(runif(dim(species_sub5)[1]*k)),nrow=dim(species_sub5)[1]), 
-  k=3, model = "global", maxit=200, smin = 1e-7, sfgrmin = 1e-7)}
+  k=4, model = "global", maxit=200, smin = 1e-7, sfgrmin = 1e-7)}
 # alternative options: model = "local", "linear" or "hybrid" with threshold = [value]
 
 
@@ -173,65 +100,9 @@ mds.secbest <- postMDS(mds[[ordered[2]]], geodist.y, pc = TRUE, halfchange = TRU
 ## Making variables from GNMDS axes 1 and 2 for plotting
 gnmds1 <- mds.best$points[, 1]
 gnmds2 <- mds.best$points[, 2]
-# gnmds3 <- mds.best$points[, 3]
+gnmds3 <- mds.best$points[, 3]
+gnmds4 <- mds.best$points[, 4]
 
-
-
-
-
-
-
-
-
-
-# ##### ----- R-communities variant (this is withour step-across though, which I seem to need)----
-# 
-# 
-# # First step is to calculate a distance matrix. See PCOA for more information about the distance measures
-# # Here we use bray-curtis distance, which is recommended for abundance data
-# dist <- vegdist(species_sub10_1,  method = "bray")
-# 
-# # In this part, we define a function NMDS.scree() that automatically 
-# # performs a NMDS for 1-10 dimensions and plots the nr of dimensions vs the stress
-# NMDS.scree <- function(x) { #where x is the name of the data frame variable
-#   plot(rep(1, 10), replicate(10, metaMDS(x, autotransform = F, k = 1)$stress), xlim = c(1, 10),ylim = c(0, 0.30), xlab = "# of Dimensions", ylab = "Stress", main = "NMDS stress plot")
-#   for (i in 1:10) {
-#     points(rep(i + 1,10),replicate(10, metaMDS(x, autotransform = F, k = i + 1)$stress))
-#   }
-# }
-# 
-# # Use the function that we just defined to choose the optimal nr of dimensions
-# NMDS.scree(dist)
-# 
-# nmds1 <- metaMDS(dist, k = 3, trymax = 100, trace = F)
-# nmds1
-# plot(nmds1)
-# stressplot(nmds1)
-# 
-# plot(nmds1, type = "t", display = "sites")
-# 
-# plot(nmds1, display = "sites", type = "n", ylim =  c(-3, 3), xlim = c(-3, 3))
-# points(nmds1, display = "sites", col = "red", cex = 1.25)
-# text(nmds2, display ="species")
-# 
-# nmds2 <- metaMDS(species_sub10_1, k = 3, trymax = 100, trace = F, autotransform = FALSE, distance="bray")
-# plot(nmds2)
-# stressplot(nmds2)
-# 
-# plot(nmds2, display = "sites", type = "n", ylim =  c(-0.1, 0.1), xlim = c(-0.1, 0.1))
-# points(nmds2, display = "sites", col = "red", cex = 1.25)
-# text(nmds2, display ="species")
-# 
-# 
-# # The function envfit will add the environmental variables as vectors to the ordination plot
-# ef <- envfit(nmds1, env.var_sub10, permu = 999)
-# ef
-# 
-# # The two last columns are of interest: the squared correlation coefficient and the associated p-value
-# # Plot the vectors of the significant correlations and interpret the plot
-# plot(nmds1, type = "t", display = "sites")
-# plot(ef, p.max = 0.05)
-# # with(ef, ordihull(nmds1, ef$method, label = TRUE)) # Not working yet
 ```
 
 ## Procrustes error
@@ -271,6 +142,15 @@ cor.test(dca2, gnmds2, method="k")
 load("output/gnmds_full_e095_2020_08_31.rda")
 gnmds1 <- gnmds.full$points[, 1]
 gnmds2 <- gnmds.full$points[, 2]
+gnmds3 <- gnmds.full$points[, 3]
+gnmds4 <- gnmds.full$points[, 4]
+
+
+load("processdata/env.var_sub5_2020_09_08.rda")
+str(env.var_sub5)
+
+
+
 
 # Bare punktene:
 plot(gnmds1, gnmds2, xlab = "gnmds1 (scaling in H.C. units)", ylab = "gnmds2 (scaling in H.C. units)", type = "n", 
@@ -281,22 +161,44 @@ plot(gnmds1, gnmds2, xlab = "gnmds1 (scaling in H.C. units)", ylab = "gnmds2 (sc
   lines(c(-3, 3), c(0, 0), lty = 2, col = 8, lwd = 2)
   lines(c(0, 0), c(-3, 3), lty = 2, col = 8, lwd = 2)
   
-  # all points, one symbol/ colour  
+  
+  # All points, one symbol/ colour
+  # Axis 1 and 2
   points(gnmds1, gnmds2, pch = 2, col = "cyan3", cex = 0.7) 
-  # points(gnmds1, gnmds3, pch = 3, col = "darkorange", cex = 0.7) # all points, one symbol/ colour
+  # Axis 1 and 3
+  points(gnmds1, gnmds3, pch = 3, col = "darkorange", cex = 0.7) 
+  # Axis 1 and 4
+  points(gnmds1, gnmds4, pch = 4, col = "darkorange", cex = 0.7) 
   
   # points ordered by "method"
+  # Axis 1 and 2
   points(gnmds1[env.var_sub5$method == "nat"], gnmds2[env.var_sub5$method == "nat"], pch = 3, col = "cyan3", cex = 0.7)
   points(gnmds1[env.var_sub5$method == "ref"], gnmds2[env.var_sub5$method == "ref"], pch = 2, col = "darkorange", cex = 0.7)
   points(gnmds1[env.var_sub5$method == "seed"], gnmds2[env.var_sub5$method == "seed"], pch = 1, col = "gold2", cex = 0.7)
   points(gnmds1[env.var_sub5$method == "pn"], gnmds2[env.var_sub5$method == "pn"], pch = 4, col = "magenta", cex = 0.7)
-
+  
+  # Axis 1 and 3
+  points(gnmds1[env.var_sub5$method == "nat"], gnmds3[env.var_sub5$method == "nat"], pch = 3, col = "cyan3", cex = 0.7)
+  points(gnmds1[env.var_sub5$method == "ref"], gnmds3[env.var_sub5$method == "ref"], pch = 2, col = "darkorange", cex = 0.7)
+  points(gnmds1[env.var_sub5$method == "seed"], gnmds3[env.var_sub5$method == "seed"], pch = 1, col = "gold2", cex = 0.7)
+  points(gnmds1[env.var_sub5$method == "pn"], gnmds3[env.var_sub5$method == "pn"], pch = 4, col = "magenta", cex = 0.7)
+  
+  # Axis 1 and 4
+  points(gnmds1[env.var_sub5$method == "nat"], gnmds4[env.var_sub5$method == "nat"], pch = 3, col = "cyan3", cex = 0.7)
+  points(gnmds1[env.var_sub5$method == "ref"], gnmds4[env.var_sub5$method == "ref"], pch = 2, col = "darkorange", cex = 0.7)
+  points(gnmds1[env.var_sub5$method == "seed"], gnmds4[env.var_sub5$method == "seed"], pch = 1, col = "gold2", cex = 0.7)
+  points(gnmds1[env.var_sub5$method == "pn"], gnmds4[env.var_sub5$method == "pn"], pch = 4, col = "magenta", cex = 0.7)
+  
+  
+  
 # Legger på vektorer for environmental variables
   mds.z <- envfit(scores(gnmds.full, choices = 1:2, origin = TRUE), env.var_sub5, 999)
-  # mds.z_test <- envfit(scores(mds.best, choices = c(1,3), origin = TRUE), env.var_sub10, 999)
+  mds.z_ax3 <- envfit(scores(gnmds.full, choices = c(1,3), origin = TRUE), env.var_sub5, 999)
+  mds.z_ax4 <- envfit(scores(gnmds.full, choices = c(1,4), origin = TRUE), env.var_sub5, 999)
   
   plot(mds.z, col = 1,  cex = 0.7, p.max = 0.01)
-  plot(mds.z_test, col = 1,  cex = 0.7, p.max = 0.01)
+  plot(mds.z_ax3, col = 1,  cex = 0.7, p.max = 0.01)
+  plot(mds.z_ax4, col = 1,  cex = 0.7, p.max = 0.01)
   # plot(mds.z, arrow.mul = 1.6, col = 1, add = T, cex = 0.7)
     
   colvec <- c("cyan3", "magenta", "darkorange", "gold2")
@@ -375,6 +277,8 @@ gnmds.full <- mds.best
 save(gnmds.full, file = "gnmds_full_e09_2020_08_31.rda")
 
 save(mds.z, file="env.var_fit_e095_2020_09_08.rda") 
+save(mds.z_ax3, file="envvar_fit_e095_axis3_2020_09_10.rda")
+save(mds.z_ax4, file="envvar_fit_e095_axis4_2020_09_10.rda")
 
 ```
 
@@ -397,35 +301,12 @@ save(mds.z, file="env.var_fit_e095_2020_09_08.rda")
 
 load("processdata/env.var_full_sub5.rda")
 load("processdata/env.var_full_sub5_2020_09_08.rda")
-
+load("processdata/env.var_full_sub5_095_k4_2020_09_10.rda")
 
 load("output/gnmds_full_e095_2020_08_31.rda")
 
 
-# str(env.var_full_sub5$grain_size_stand_f)
-# table(env.var_full_sub5$grain_size_stand_f)
-#  #  1   2   3   5   6
-#  # 27   0  13   2 177
-# env.var_full_sub5$grain_size_stand_f <- as.numeric(env.var_full_sub5$grain_size_stand_f)
-# env.var_full_sub5$grain_size_stand_f <- ifelse(env.var_full_sub5$grain_size_stand_f >= 4, 6, env.var_full_sub5$grain_size_stand_f)
-# table(env.var_full_sub5$grain_size_stand_f)
-#  #  1   3   6
-#  # 27  13 179
-# env.var_full_sub5$grain_size_stand_f <- as.factor(env.var_full_sub5$grain_size_stand_f)
-# str(env.var_full_sub5$grain_size_stand_f)
-# table(env.var_full_sub5$grain_size_stand_f)
-# 
-# 
-# str(env.var_full_sub5$exposure)
-# table(env.var_full_sub5$exposure)
-#   # E   F   N  NE  NW   S  SE  SW   W 
-#   # 9 124  31   1   6  19  13   6  10
-# levels(env.var_full_sub5$exposure)[levels(env.var_full_sub5$exposure)=="NE"] <- "N"
-# str(env.var_full_sub5)
-# table(env.var_full_sub5$exposure)
 
-
-# save(env.var_full_sub5, file = "env.var_full_sub5_2020_09_08.rda")
 
 
 
@@ -434,6 +315,8 @@ load("output/gnmds_full_e095_2020_08_31.rda")
 # Depending on: May need to load nmds results and make gmnds2 and 2
 gnmds1 <- gnmds.full$points[, 1]
 gnmds2 <- gnmds.full$points[, 2]
+gnmds3 <- gnmds.full$points[, 3]
+gnmds4 <- gnmds.full$points[, 4]
 
 uid <- unique(env.var_full_sub5$id)
 
@@ -443,9 +326,9 @@ for(i in 1:length(uid)) {
   mean_gnmds1[i] <- mean(gnmds1[env.var_full_sub5$id == (uid[i])], na.rm=T)
 }
 mean_gnmds1
-mean_gnmds1_data <- as.data.frame(mean_gnmds1)
-mean_gnmds1_data <- cbind(mean_gnmds1_data, uid)
-mean_gnmds1_data
+# mean_gnmds1_data <- as.data.frame(mean_gnmds1)
+# mean_gnmds1_data <- cbind(mean_gnmds1_data, uid)
+# mean_gnmds1_data
 
 # Akse 2
 mean_gnmds2 <- rep(0, times=length(uid))
@@ -453,20 +336,40 @@ for(i in 1:length(uid)) {
   mean_gnmds2[i] <- mean(gnmds2[env.var_full_sub5$id == (uid[i])], na.rm=T)
 }
 mean_gnmds2
-mean_gnmds2_data <- as.data.frame(mean_gnmds2)
-mean_gnmds2_data <- cbind(mean_gnmds2_data, uid)
-mean_gnmds2_data
+# mean_gnmds2_data <- as.data.frame(mean_gnmds2)
+# mean_gnmds2_data <- cbind(mean_gnmds2_data, uid)
+# mean_gnmds2_data
+
+# Akse 3
+mean_gnmds3 <- rep(0, times=length(uid))
+for(i in 1:length(uid)) {
+  mean_gnmds3[i] <- mean(gnmds3[env.var_full_sub5$id == (uid[i])], na.rm=T)
+}
+mean_gnmds3
+# mean_gnmds3_data <- as.data.frame(mean_gnmds3)
+# mean_gnmds3_data <- cbind(mean_gnmds3_data, uid)
+# mean_gnmds3_data
+
+# Akse 4
+mean_gnmds4 <- rep(0, times=length(uid))
+for(i in 1:length(uid)) {
+  mean_gnmds4[i] <- mean(gnmds4[env.var_full_sub5$id == (uid[i])], na.rm=T)
+}
+mean_gnmds4
+# mean_gnmds4_data <- as.data.frame(mean_gnmds4)
+# mean_gnmds4_data <- cbind(mean_gnmds4_data, uid)
+# mean_gnmds4_data
 
 
 ## Attach the two axisscores to the dataset to use in mixed models
-mean_gnmds_data <- cbind(mean_gnmds1_data, mean_gnmds2)
+mean_gnmds_data <- cbind(mean_gnmds1, mean_gnmds2, mean_gnmds3, mean_gnmds4)
 env.var_full_sub5 <- cbind(env.var_full_sub5, mean_gnmds_data)
 names(env.var_full_sub5)
-env.var_full_sub5 <- env.var_full_sub5[, -c(46)]
-
 str(env.var_full_sub5)
 
-save(env.var_full_sub5, file = "env.var_full_sub5_2020_09_08.rda") # columns 43 and 44 (mean gnmds) are from ordination with epsilon 0.9 and k=3; columns 45 and 46 (mean gnmds) are from ordination with epsilon 0.95 and k=4
+
+
+save(env.var_full_sub5, file = "env.var_full_sub5_095_k4_2020_09_10.rda")
 
 
 
