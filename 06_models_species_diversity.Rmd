@@ -224,12 +224,11 @@ head(data_plots4)
 
 
 
-## -------------------- Linear mixed model with Ordi 2 gmnds axis scores from AXIS 1 as response (all plots) -------------------
-Axis scales retrieved from ordination with dataset species_sub5 epsilon 0.95 and k=4 (load("processdata/env.var_full_sub5_095_k4_2020_09_10.rda"))
+## -------------------- Linear mixed model with Ordi 2 gmnds axis scores from AXIS 1 as response -------------------
+Axis scales retrieved from ordination with dataset species_sub5 epsilon 0.95 and k=4 (load("processdata/env.var_full_sub5_095_k4_2020_09_11.rda"))
 
 ```{r}
 str(env.var_full_sub5)
-env.var_full_sub5$site_id_new.x <- as.factor(env.var_full_sub5$site_id_new.x)
 
 ```
 
@@ -243,82 +242,70 @@ lmer_caco1 <- lmer(mean_gnmds1 ~ caco + (1|site_id_new.x), data = env.var_full_s
 lmer_expo1 <- lmer(mean_gnmds1 ~ exposure + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
 lmer_grain_size1 <- lmer(mean_gnmds1 ~ grain_size_stand_f + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
 lmer_site_type1 <- lmer(mean_gnmds1 ~ site_type + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
-lmer_year1 <- lmer(mean_gnmds1 ~ year + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+lmer_years1 <- lmer(mean_gnmds1 ~ years_since + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
 
 
-AIC(lmer_method1, lmer_dist_int_veg1, lmer_loi1, lmer_caco1, lmer_expo1, lmer_grain_size1, lmer_site_type1, lmer_year1)
+AIC(lmer_method1, lmer_dist_int_veg1, lmer_loi1, lmer_caco1, lmer_expo1, lmer_grain_size1, lmer_site_type1, lmer_years1)
 anova(lmer_method, lmer_loi)
 anova(lmer_method, lmer_caco)
 anova(lmer_method, lmer_dist_int_veg)
 
 
-lmerfull1 <- lmer(mean_gnmds1 ~ dist_int_veg + loi + caco + exposure + grain_size_stand_f + method + site_type + year + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+lmerfull1 <- lmer(mean_gnmds1 ~ dist_int_veg + loi + caco + exposure + grain_size_stand_f + method + site_type + years_since + (1|site_id_new.x), data = env.var_full_sub5, REML = F) # Best
 summary(lmerfull1)
 
 m1_a1 <- lmer(mean_gnmds1 ~ method + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
 m2_a1 <- lmer(mean_gnmds1 ~ method + caco + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
 m3_a1 <- lmer(mean_gnmds1 ~ method + caco + loi + (1|site_id_new.x), data = env.var_full_sub5, REML = F) 
-m4_a1 <- lmer(mean_gnmds1 ~ method + caco + loi + exposure + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
-m5_a1 <- lmer(mean_gnmds1 ~ method + caco + loi + exposure + year + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
-m6_a1 <- lmer(mean_gnmds1 ~ method + caco + loi + year + (1|site_id_new.x), data = env.var_full_sub5, REML = F) # BEST
-m7_a1 <- lmer(mean_gnmds1 ~ method*year + caco + loi +  (1|site_id_new.x), data = env.var_full_sub5, REML = F) # Best, but what's with the warning???
-# fixed-effect model matrix is rank deficient so dropping 10 columns / coefficients
-m8_a1 <- lmer(mean_gnmds1 ~ method + log(caco+1) + log(loi+1) + year + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
-m9_a1 <- lmer(mean_gnmds1 ~ method + caco + log(loi+1) + year + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
-m10_a1 <- lmer(mean_gnmds1 ~ method + caco + loi + year + dist_int_veg + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+m4_a1 <- lmer(mean_gnmds1 ~ method + caco + loi + dist_int_veg + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+m5_a1 <- lmer(mean_gnmds1 ~ method + caco + exposure + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+m6_a1 <- lmer(mean_gnmds1 ~ method + caco + exposure + years_since + (1|site_id_new.x), data = env.var_full_sub5, REML = F) # Best, simplest
+m7_a1 <- lmer(mean_gnmds1 ~ method + caco + exposure + years_since + dist_int_veg + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+m8_a1 <- lmer(mean_gnmds1 ~ method + caco + exposure + years_since + dist_int_veg + loi + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
 
-
+summary(m6_a1)
 
 AIC(lmerfull1, m1_a1, m2_a1, m3_a1, m4_a1, m5_a1, m6_a1, m7_a1)
 AIC(m6_a1, m8_a1, m9_a1, m10_a1)
-#       df      AIC 
-#lmerfull1 27 196.7060
-#   m1_a1  6 219.8779
-#   m2_a1  7 203.1961
-#   m3_a1  8 200.6369
-#   m4_a1 16 202.4572
-#   m5_a1 22 191.9755
-#   m6_a1 14 188.0477 # BEST
-#   m7_a1 22 163.6679
+#           df      AIC
+# lmerfull1 20 142.8346 # Best
+# m1_a1      6 164.4241
+# m2_a1      7 147.6651
+# m3_a1      8 145.1228
+# m4_a1      9 147.1127
+# m5_a1     14 145.2776
+# m6_a1     15 142.8783 # Best, simplest
+# m7_a1     16 144.7735
 
-#       df      AIC
-# m6_a1 14 188.0477 # BEST 
-# m8_a1 14 192.3133
-# m9_a1 14 190.9339
-# m10_a1 15 189.7969
+
 
 library(AICcmodavg)
 
 Cand.models <- list( )
-Cand.models[[1]] <- lmer(mean_gnmds1 ~ dist_int_veg + loi + caco + exposure + grain_size_stand_f + method + site_type + year + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+Cand.models[[1]] <-  lmer(mean_gnmds1 ~ dist_int_veg + loi + caco + exposure + grain_size_stand_f + method + site_type + years_since + (1|site_id_new.x), data = env.var_full_sub5, REML = F) # Best
 Cand.models[[2]] <- lmer(mean_gnmds1 ~ method + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
 Cand.models[[3]] <- lmer(mean_gnmds1 ~ method + caco + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
 Cand.models[[4]] <- lmer(mean_gnmds1 ~ method + caco + loi + (1|site_id_new.x), data = env.var_full_sub5, REML = F) 
-Cand.models[[5]] <- lmer(mean_gnmds1 ~ method + caco + loi + exposure + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
-Cand.models[[6]] <- lmer(mean_gnmds1 ~ method + caco + loi + exposure + year + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
-Cand.models[[7]] <- lmer(mean_gnmds1 ~ method + caco + loi + year + (1|site_id_new.x), data = env.var_full_sub5, REML = F) # BEST
-Cand.models[[8]] <- lmer(mean_gnmds1 ~ method*year + caco + loi +  (1|site_id_new.x), data = env.var_full_sub5, REML = F) # Best, but what's with the warning???
-# fixed-effect model matrix is rank deficient so dropping 10 columns / coefficients
-Cand.models[[9]] <- lmer(mean_gnmds1 ~ method + log(caco+1) + log(loi+1) + year + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
-Cand.models[[10]] <- lmer(mean_gnmds1 ~ method + caco + log(loi+1) + year + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
-Cand.models[[11]] <- lmer(mean_gnmds1 ~ method + caco + loi + year + dist_int_veg + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+Cand.models[[5]] <- lmer(mean_gnmds1 ~ method + caco + loi + dist_int_veg + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+Cand.models[[6]] <- lmer(mean_gnmds1 ~ method + caco + exposure + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+Cand.models[[7]] <- lmer(mean_gnmds1 ~ method + caco + exposure + years_since + (1|site_id_new.x), data = env.var_full_sub5, REML = F) # Best, simplest
+Cand.models[[8]] <- lmer(mean_gnmds1 ~ method + caco + exposure + years_since + dist_int_veg + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+Cand.models[[9]] <- lmer(mean_gnmds1 ~ method + caco + exposure + years_since + dist_int_veg + loi + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
 
 aictab(Cand.models, second.ord = F) 
-#        K    AIC Delta_AIC AICWt Cum.Wt      LL
-# Mod8  22 163.67      0.00     1      1  -59.83
-# Mod7  14 188.05     24.38     0      1  -80.02
-# Mod11 15 189.80     26.13     0      1  -79.90
-# Mod6  21 190.29     26.62     0      1  -74.14
-# Mod10 14 190.93     27.27     0      1  -81.47
-# Mod9  14 192.31     28.65     0      1  -82.16
-# Mod1  25 193.69     30.02     0      1  -71.84
-# Mod4   8 200.64     36.97     0      1  -92.32
-# Mod5  15 200.86     37.19     0      1  -85.43
-# Mod3   7 203.20     39.53     0      1  -94.60
-# Mod2   6 219.88     56.21     0      1 -103.94
+#       K    AIC Delta_AIC AICWt Cum.Wt     LL
+# Mod1 20 142.83      0.00  0.26   0.26 -51.42
+# Mod7 15 142.88      0.04  0.25   0.51 -56.44
+# Mod9 17 143.57      0.74  0.18   0.69 -54.79
+# Mod8 16 144.77      1.94  0.10   0.79 -56.39
+# Mod4  8 145.12      2.29  0.08   0.87 -64.56
+# Mod6 14 145.28      2.44  0.08   0.95 -58.64
+# Mod5  9 147.11      4.28  0.03   0.98 -64.56
+# Mod3  7 147.67      4.83  0.02   1.00 -66.83
+# Mod2  6 164.42     21.59  0.00   1.00 -76.21
 
 
-m6_a1_reml <- lmer(mean_gnmds1 ~ method + caco + loi + year + (1|site_id_new.x), data = env.var_full_sub5, REML = T)
+m6_a1_reml <- lmer(mean_gnmds1 ~ method + caco + exposure + years_since + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
 
 summary(m6_a1_reml)
 
@@ -340,16 +327,16 @@ plot_model(m6_a1_reml, type = "est", show.intercept = T)
 
 plot_model(m6_a1_reml, type = "eff", terms = "method")
 plot_model(m6_a1_reml, type = "eff", terms = "caco")
-plot_model(m6_a1_reml, type = "eff", terms = "loi")
-plot_model(m6_a1_reml, type = "eff", terms = "year")
+plot_model(m6_a1_reml, type = "eff", terms = "exposure")
+plot_model(m6_a1_reml, type = "eff", terms = "years_since")
 
 ```
 
 
 
 
-## -------------------- Linear mixed model with gmnds axis scores from AXIS 2 as response (all plots) -------------------
-Axis scales retrieved from ordination with dataset species_sub5 epsilon 0.95 and k=4 (load("processdata/env.var_full_sub5_095_k4_2020_09_10.rda"))
+## -------------------- Linear mixed model with gmnds axis scores from AXIS 2 as response -------------------
+Axis scales retrieved from ordination with dataset species_sub5 epsilon 0.95 and k=4 (load("processdata/env.var_full_sub5_095_k4_2020_09_11.rda"))
 ```{r}
 lmer_method2 <- lmer(mean_gnmds2 ~ method + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
 lmer_dist_int_veg2 <- lmer(mean_gnmds2 ~ dist_int_veg + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
@@ -358,66 +345,58 @@ lmer_caco2 <- lmer(mean_gnmds2 ~ caco + (1|site_id_new.x), data = env.var_full_s
 lmer_expo2 <- lmer(mean_gnmds2 ~ exposure + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
 lmer_grain_size2 <- lmer(mean_gnmds2 ~ grain_size_stand_f + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
 lmer_site_type2 <- lmer(mean_gnmds2 ~ site_type + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
-lmer_year2 <- lmer(mean_gnmds2 ~ year + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+lmer_years2 <- lmer(mean_gnmds2 ~ years_since + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
 
 
-AIC(lmer_method2, lmer_dist_int_veg2, lmer_loi2, lmer_caco2, lmer_expo2, lmer_grain_size2, lmer_site_type2, lmer_year2)
+AIC(lmer_method2, lmer_dist_int_veg2, lmer_loi2, lmer_caco2, lmer_expo2, lmer_grain_size2, lmer_site_type2, lmer_years2)
 anova(lmer_caco2, lmer_loi2)
 anova(lmer_site_type2, lmer_loi2)
 
 
-lmerfull2 <- lmer(mean_gnmds2 ~ dist_int_veg + loi + caco + exposure + grain_size_stand_f + method + site_type + year + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+lmerfull2 <- lmer(mean_gnmds2 ~ dist_int_veg + loi + caco + exposure + grain_size_stand_f + method + site_type + years_since + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
 summary(lmerfull2)
 
-m1_a2 <- lmer(mean_gnmds2 ~ method + (1|site_id_new.x), data = env.var_full_sub5, REML = F) 
-m2_a2 <- lmer(mean_gnmds2 ~ method + year + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
-m3_a2 <- lmer(mean_gnmds2 ~ method + exposure + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
-m4_a2 <- lmer(mean_gnmds2 ~ method + year + exposure + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
-m5_a2 <- lmer(mean_gnmds2 ~ method + dist_int_veg + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
-m6_a2 <- lmer(mean_gnmds2 ~ method + dist_int_veg + caco + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
-m7_a2 <- lmer(mean_gnmds2 ~ method + year + caco + dist_int_veg + (1|site_id_new.x), data = env.var_full_sub5, REML = F) 
-m8_a2 <- lmer(mean_gnmds2 ~ method + year + caco + dist_int_veg + exposure + (1|site_id_new.x), data = env.var_full_sub5, REML = F) # Best
+m1_a2 <- lmer(mean_gnmds2 ~ exposure + (1|site_id_new.x), data = env.var_full_sub5, REML = F) 
+m2_a2 <- lmer(mean_gnmds2 ~ method + exposure + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+m3_a2 <- lmer(mean_gnmds2 ~ method + caco + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+m4_a2 <- lmer(mean_gnmds2 ~ method + caco + grain_size_stand_f + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+m5_a2 <- lmer(mean_gnmds2 ~ method + caco + grain_size_stand_f + exposure + (1|site_id_new.x), data = env.var_full_sub5, REML = F) # Best
 
-AIC(m1_a2, m2_a2, m3_a2, m4_a2, m5_a2, m6_a2, m7_a2, m8_a2)
-#       df      AIC
-# m1_a2  6 300.1943
-# m2_a2 12 298.3096
-# m3_a2 14 295.7121
-# m4_a2 20 296.7170
-# m5_a2  7 300.7337
-# m6_a2  8 297.9013
-# m7_a2 14 292.9709
-# m8_a2 22 291.5535  # BEST
+
+
+AIC(lmerfull2, m1_a2, m2_a2, m3_a2, m4_a2, m5_a2, m6_a2)
+#           df      AIC
+# lmerfull2 20 242.4927
+# m1_a2     10 243.1169
+# m2_a2     13 239.9409
+# m3_a2     13 239.9409
+# m4_a2      7 243.0272
+# m5_a2      9 244.3096
+# m6_a2     16 238.1464 # Best
 
 library(AICcmodavg)
 
 Cand.models <- list( )
-Cand.models[[1]] <- lmer(mean_gnmds2 ~ dist_int_veg + loi + caco + exposure + grain_size_stand_f + method + site_type + year + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
-Cand.models[[2]] <- lmer(mean_gnmds2 ~ method + (1|site_id_new.x), data = env.var_full_sub5, REML = F) 
-Cand.models[[3]] <- lmer(mean_gnmds2 ~ method + year + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
-Cand.models[[4]] <- lmer(mean_gnmds2 ~ method + exposure + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
-Cand.models[[5]] <- lmer(mean_gnmds2 ~ method + year + exposure + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
-Cand.models[[6]] <- lmer(mean_gnmds2 ~ method + dist_int_veg + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
-Cand.models[[7]] <- lmer(mean_gnmds2 ~ method + dist_int_veg + caco + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
-Cand.models[[8]] <- lmer(mean_gnmds2 ~ method + year + caco + dist_int_veg + (1|site_id_new.x), data = env.var_full_sub5, REML = F) 
-Cand.models[[9]] <- lmer(mean_gnmds2 ~ method + year + caco + dist_int_veg + exposure + (1|site_id_new.x), data = env.var_full_sub5, REML = F) #BEST
+Cand.models[[1]] <- lmer(mean_gnmds2 ~ dist_int_veg + loi + caco + exposure + grain_size_stand_f + method + site_type + years_since + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+Cand.models[[2]] <- lmer(mean_gnmds2 ~ exposure + (1|site_id_new.x), data = env.var_full_sub5, REML = F) 
+Cand.models[[3]] <- lmer(mean_gnmds2 ~ method + exposure + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+Cand.models[[4]] <- lmer(mean_gnmds2 ~ method + caco + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+Cand.models[[5]] <- lmer(mean_gnmds2 ~ method + caco + grain_size_stand_f + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
+Cand.models[[6]] <- lmer(mean_gnmds2 ~ method + caco + grain_size_stand_f + exposure + (1|site_id_new.x), data = env.var_full_sub5, REML = F) # Best
 
 aictab(Cand.models, second.ord = F) 
 #       K    AIC Delta_AIC AICWt Cum.Wt      LL
-# Mod9 21 291.07      0.00  0.45   0.45 -124.53
-# Mod1 25 292.77      1.70  0.19   0.65 -121.39
-# Mod8 14 292.97      1.90  0.18   0.82 -132.49
-# Mod4 13 294.24      3.18  0.09   0.92 -134.12
-# Mod5 19 295.53      4.47  0.05   0.96 -128.77
-# Mod7  8 297.90      6.83  0.01   0.98 -140.95
-# Mod3 12 298.31      7.24  0.01   0.99 -137.15
-# Mod2  6 300.19      9.13  0.00   1.00 -144.10
-# Mod6  7 300.73      9.67  0.00   1.00 -143.37
+# Mod6 16 238.15      0.00  0.58   0.58 -103.07
+# Mod3 13 239.94      1.79  0.23   0.81 -106.97
+# Mod1 20 242.49      4.35  0.07   0.88 -101.25
+# Mod4  7 243.03      4.88  0.05   0.93 -114.51
+# Mod2 10 243.12      4.97  0.05   0.97 -111.56
+# Mod5  9 244.31      6.16  0.03   1.00 -113.15
 
 
-summary(m8_a2)
+summary(m5_a2)
 
-m8_a2_reml <- lmer(mean_gnmds2 ~ method + year + caco + dist_int_veg + exposure + (1|site_id_new.x), data = env.var_full_sub5, REML = T)
+m5_a2_reml <- lmer(mean_gnmds2 ~ method + caco + grain_size_stand_f + exposure + (1|site_id_new.x), data = env.var_full_sub5, REML = F)
 
 ```
 
@@ -425,22 +404,21 @@ m8_a2_reml <- lmer(mean_gnmds2 ~ method + year + caco + dist_int_veg + exposure 
 #### Checking assumptions
 ```{r}
 library(sjPlot)
-plot_model(m8_a2_reml, type = "diag")
+plot_model(m5_a2_reml, type = "diag")
 
 ```
 
 
 #### Plot results
 ```{r}
-tab_model(m8_a2_reml, p.style = "stars")
+tab_model(m5_a2_reml, p.style = "stars")
 
-plot_model(m8_a2_reml, type = "est", show.intercept = T)
+plot_model(m5_a2_reml, type = "est", show.intercept = T)
 
-plot_model(m8_a2_reml, type = "eff", terms = "method")
-plot_model(m8_a2_reml, type = "eff", terms = "caco")
-plot_model(m8_a2_reml, type = "eff", terms = "exposure")
-plot_model(m8_a2_reml, type = "eff", terms = "year")
-plot_model(m8_a2_reml, type = "eff", terms = "dist_int_veg")
+plot_model(m5_a2_reml, type = "eff", terms = "method")
+plot_model(m5_a2_reml, type = "eff", terms = "caco")
+plot_model(m5_a2_reml, type = "eff", terms = "grain_size_stand_f")
+plot_model(m5_a2_reml, type = "eff", terms = "exposure")
 
 ```
 

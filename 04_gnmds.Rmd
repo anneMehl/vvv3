@@ -19,15 +19,22 @@ library(plyr)
 library(tidyverse)
 library(dplyr)
 
-# species<- read.csv2("./data/species.csv", sep=";")
-# env.var<- read.csv2("./data/envvar3.csv", sep=";")
 
-# species_4 <- data_species_wide4[, c(6:194)]
-# str(species_4)
-# sum(rowSums(species_4) == 0)
-# sum(colSums(species_4) == 0)
+load("processdata/species_sub5_2020_08_27.rda")
+
+load("processdata/env.var_sub5_095_k4_2020_09_11.rda")
+load("processdata/env.var_full_sub5_095_k4_2020_09_10.rda") 
+
+str(species_sub5)
+str(env.var_sub5)
+str(env.var_full_sub5)
 
 
+names(env.var_sub5)
+env.var_sub5 <- env.var_sub5[, -c(3)]
+
+names(env.var_sub1)
+env.var_sub1 <- env.var_sub1[, -c(3)]
 
 ```
 
@@ -36,7 +43,7 @@ library(dplyr)
 
 Kjører DCA på hele datamaterialet. Kjapt plott for å se etter artifakter (feks tongue effect eller andre mønster i data som kommer av analysen).
 ```{r DCA, message=FALSE, warning=FALSE, include=FALSE}
-dca.tot <- decorana(species_sub5)
+dca.tot <- decorana(species_sub1)
 # Ekstraherer aksene:
 dca1 <- scores(dca.tot, display = "sites", origin = FALSE)[, 1]
 dca2 <- scores(dca.tot, display = "sites", origin = FALSE)[, 2]
@@ -53,7 +60,7 @@ Running the GNMDS (more or less just script from Rune Halvorsen)
 library(vegan)
 
 ## Making Bray-Curtis dissimilarity matrix:
-dist.y <- vegdist(species_sub5, method = "bray") 
+dist.y <- vegdist(species_sub1, method = "bray") 
 
 ## Replacing unreliable distances (B-C > 0.8 by geodesic distances, using stepacross; note that the optimal value for epsilon may be dataset-specific
 geodist.y <- isomapdist(dist.y, epsilon = 0.95)
@@ -67,7 +74,7 @@ mds <- NULL
 #   k=3, model = "global", maxit=200, smin = 1e-7, sfgrmin = 1e-7)}
 
 for(i in 1:100)
-{mds[[i]]<-monoMDS(geodist.y, matrix(c(runif(dim(species_sub5)[1]*k)),nrow=dim(species_sub5)[1]), 
+{mds[[i]]<-monoMDS(geodist.y, matrix(c(runif(dim(species_sub1)[1]*k)),nrow=dim(species_sub1)[1]), 
   k=4, model = "global", maxit=200, smin = 1e-7, sfgrmin = 1e-7)}
 # alternative options: model = "local", "linear" or "hybrid" with threshold = [value]
 
@@ -88,13 +95,13 @@ mds.stress[ordered[2]]
 # mds.stress[ordered[3]]
 
 ## For dist.y scaling of axes to half change units and varimax rotation by postMDS
-mds.best <- postMDS(mds[[ordered[1]]], dist.y, pc = TRUE, halfchange = TRUE)
-mds.secbest <- postMDS(mds[[ordered[2]]], dist.y, pc = TRUE, halfchange = TRUE)
+# mds.best <- postMDS(mds[[ordered[1]]], dist.y, pc = TRUE, halfchange = TRUE)
+# mds.secbest <- postMDS(mds[[ordered[2]]], dist.y, pc = TRUE, halfchange = TRUE)
 
 
 ## For geodist.yscaling of axes to half change units and varimax rotation by postMDS
-mds.best <- postMDS(mds[[ordered[1]]], geodist.y, pc = TRUE, halfchange = TRUE, threshold = 0.9)
-mds.secbest <- postMDS(mds[[ordered[2]]], geodist.y, pc = TRUE, halfchange = TRUE, threshold = 0.9)
+mds.best <- postMDS(mds[[ordered[1]]], geodist.y, pc = TRUE, halfchange = TRUE, threshold = 0.8)
+mds.secbest <- postMDS(mds[[ordered[2]]], geodist.y, pc = TRUE, halfchange = TRUE, threshold = 0.8)
 # mds.thirdbest <- postMDS(mds[[ordered[3]]], geodist.y, pc = TRUE, halfchange = TRUE, threshold = 0.9)
 
 ## Making variables from GNMDS axes 1 and 2 for plotting
@@ -140,6 +147,7 @@ cor.test(dca2, gnmds2, method="k")
 ```{r GNMDS plot, echo=FALSE, message=FALSE, warning=FALSE}
 # load the ordination data
 load("output/gnmds_full_e095_2020_08_31.rda")
+load("output/gnmds_full_sub5_e095_2020_09_11.rda")
 gnmds1 <- gnmds.full$points[, 1]
 gnmds2 <- gnmds.full$points[, 2]
 gnmds3 <- gnmds.full$points[, 3]
@@ -148,7 +156,7 @@ gnmds4 <- gnmds.full$points[, 4]
 
 load("processdata/env.var_sub5_2020_09_08.rda")
 str(env.var_sub5)
-
+load("output/env.var_fit_sub5_e095_2020_09_11.rda")
 
 
 
@@ -172,10 +180,10 @@ plot(gnmds1, gnmds2, xlab = "gnmds1 (scaling in H.C. units)", ylab = "gnmds2 (sc
   
   # points ordered by "method"
   # Axis 1 and 2
-  points(gnmds1[env.var_sub5$method == "nat"], gnmds2[env.var_sub5$method == "nat"], pch = 3, col = "cyan3", cex = 0.7)
-  points(gnmds1[env.var_sub5$method == "ref"], gnmds2[env.var_sub5$method == "ref"], pch = 2, col = "darkorange", cex = 0.7)
-  points(gnmds1[env.var_sub5$method == "seed"], gnmds2[env.var_sub5$method == "seed"], pch = 1, col = "gold2", cex = 0.7)
-  points(gnmds1[env.var_sub5$method == "pn"], gnmds2[env.var_sub5$method == "pn"], pch = 4, col = "magenta", cex = 0.7)
+  points(gnmds1[env.var_sub1$method == "nat"], gnmds2[env.var_sub1$method == "nat"], pch = 3, col = "cyan3", cex = 0.7)
+  points(gnmds1[env.var_sub1$method == "ref"], gnmds2[env.var_sub1$method == "ref"], pch = 2, col = "darkorange", cex = 0.7)
+  points(gnmds1[env.var_sub1$method == "seed"], gnmds2[env.var_sub1$method == "seed"], pch = 1, col = "gold2", cex = 0.7)
+  points(gnmds1[env.var_sub1$method == "pn"], gnmds2[env.var_sub1$method == "pn"], pch = 4, col = "magenta", cex = 0.7)
   
   # Axis 1 and 3
   points(gnmds1[env.var_sub5$method == "nat"], gnmds3[env.var_sub5$method == "nat"], pch = 3, col = "cyan3", cex = 0.7)
@@ -192,7 +200,7 @@ plot(gnmds1, gnmds2, xlab = "gnmds1 (scaling in H.C. units)", ylab = "gnmds2 (sc
   
   
 # Legger på vektorer for environmental variables
-  mds.z <- envfit(scores(gnmds.full, choices = 1:2, origin = TRUE), env.var_sub5, 999)
+  mds.z <- envfit(scores(mds.best, choices = 1:2, origin = TRUE), env.var_sub1, 999)
   mds.z_ax3 <- envfit(scores(gnmds.full, choices = c(1,3), origin = TRUE), env.var_sub5, 999)
   mds.z_ax4 <- envfit(scores(gnmds.full, choices = c(1,4), origin = TRUE), env.var_sub5, 999)
   
@@ -274,9 +282,9 @@ ordihull(mds.best, env.var_sub10$region, display="sites", col="blue", lty=1, lwd
 ## To save gnmds reults (mds and envfit)
 ```{r}
 gnmds.full <- mds.best
-save(gnmds.full, file = "gnmds_full_e09_2020_08_31.rda")
+save(gnmds.full, file = "gnmds_full_sub1_e095_2020_09_11.rda")
 
-save(mds.z, file="env.var_fit_e095_2020_09_08.rda") 
+save(mds.z, file="env.var_fit_sub1_e095_2020_09_11.rda") 
 save(mds.z_ax3, file="envvar_fit_e095_axis3_2020_09_10.rda")
 save(mds.z_ax4, file="envvar_fit_e095_axis4_2020_09_10.rda")
 
@@ -296,15 +304,21 @@ save(mds.z_ax4, file="envvar_fit_e095_axis4_2020_09_10.rda")
 # 
 # env.var_2 <- cbind(env.var, species_richness)
 # env.var_full_sub5 <- subset(env.var_2, species_richness >5)
-# # env.var_full_sub5 <- env.var_full_sub5[, -c(41)]
 # names(env.var_full_sub5)
+# 
+# save(env.var_full_sub1, file = "processdata/env.var_full_sub1_095_k4_2020_09_10.rda")
+# save(env.var_full_sub5, file = "processdata/env.var_full_sub5_095_k4_2020_09_10.rda")
 
-load("processdata/env.var_full_sub5.rda")
-load("processdata/env.var_full_sub5_2020_09_08.rda")
+
+# load("processdata/env.var_full_sub5.rda")
+# load("processdata/env.var_full_sub5_2020_09_08.rda")
 load("processdata/env.var_full_sub5_095_k4_2020_09_10.rda")
 
-load("output/gnmds_full_e095_2020_08_31.rda")
+load("processdata/env.var_full_sub1_095_k4_2020_09_10.rda")
 
+
+load("output/gnmds_full_sub5_e095_2020_09_11.rda")
+load("output/gnmds_full_sub1_e095_2020_09_11.rda")
 
 
 
@@ -318,12 +332,12 @@ gnmds2 <- gnmds.full$points[, 2]
 gnmds3 <- gnmds.full$points[, 3]
 gnmds4 <- gnmds.full$points[, 4]
 
-uid <- unique(env.var_full_sub5$id)
+uid <- unique(env.var_full_sub1$id)
 
 # Akse1
 mean_gnmds1 <- rep(0, times=length(uid))
 for(i in 1:length(uid)) {
-  mean_gnmds1[i] <- mean(gnmds1[env.var_full_sub5$id == (uid[i])], na.rm=T)
+  mean_gnmds1[i] <- mean(gnmds1[env.var_full_sub1$id == (uid[i])], na.rm=T)
 }
 mean_gnmds1
 # mean_gnmds1_data <- as.data.frame(mean_gnmds1)
@@ -333,7 +347,7 @@ mean_gnmds1
 # Akse 2
 mean_gnmds2 <- rep(0, times=length(uid))
 for(i in 1:length(uid)) {
-  mean_gnmds2[i] <- mean(gnmds2[env.var_full_sub5$id == (uid[i])], na.rm=T)
+  mean_gnmds2[i] <- mean(gnmds2[env.var_full_sub1$id == (uid[i])], na.rm=T)
 }
 mean_gnmds2
 # mean_gnmds2_data <- as.data.frame(mean_gnmds2)
@@ -343,7 +357,7 @@ mean_gnmds2
 # Akse 3
 mean_gnmds3 <- rep(0, times=length(uid))
 for(i in 1:length(uid)) {
-  mean_gnmds3[i] <- mean(gnmds3[env.var_full_sub5$id == (uid[i])], na.rm=T)
+  mean_gnmds3[i] <- mean(gnmds3[env.var_full_sub1$id == (uid[i])], na.rm=T)
 }
 mean_gnmds3
 # mean_gnmds3_data <- as.data.frame(mean_gnmds3)
@@ -353,7 +367,7 @@ mean_gnmds3
 # Akse 4
 mean_gnmds4 <- rep(0, times=length(uid))
 for(i in 1:length(uid)) {
-  mean_gnmds4[i] <- mean(gnmds4[env.var_full_sub5$id == (uid[i])], na.rm=T)
+  mean_gnmds4[i] <- mean(gnmds4[env.var_full_sub1$id == (uid[i])], na.rm=T)
 }
 mean_gnmds4
 # mean_gnmds4_data <- as.data.frame(mean_gnmds4)
@@ -363,13 +377,13 @@ mean_gnmds4
 
 ## Attach the two axisscores to the dataset to use in mixed models
 mean_gnmds_data <- cbind(mean_gnmds1, mean_gnmds2, mean_gnmds3, mean_gnmds4)
-env.var_full_sub5 <- cbind(env.var_full_sub5, mean_gnmds_data)
-names(env.var_full_sub5)
-str(env.var_full_sub5)
+env.var_full_sub1 <- cbind(env.var_full_sub1, mean_gnmds_data)
+names(env.var_full_sub1)
+str(env.var_full_sub1)
 
 
 
-save(env.var_full_sub5, file = "env.var_full_sub5_095_k4_2020_09_10.rda")
+save(env.var_full_sub1, file = "env.var_full_sub1_095_k4_2020_09_11.rda")
 
 
 
